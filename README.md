@@ -13,7 +13,7 @@ Curiosità con AI (Gemini): Con un semplice click, gli utenti possono chiedere a
 
 Live Video dalla ISS: Integra la diretta streaming ufficiale della NASA dalla Stazione Spaziale, offrendo una vista mozzafiato della Terra dallo spazio.
 
-Struttura Professionale: La pagina è già predisposta per la monetizzazione tramite Google AdSense e include sezioni per le donazioni, disclaimer e note sulla privacy.
+
 
 🛠️ Tecnologie Utilizzate
 Frontend: HTML5, CSS3, JavaScript
