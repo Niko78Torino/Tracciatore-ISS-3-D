@@ -58,6 +58,10 @@
             width: 100%;
             height: 100%;
         }
+        .camera-btn.active {
+            background-color: #06b6d4; /* cyan-500 */
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -121,20 +125,44 @@
                 </div>
             </div>
 
-            <!-- Colonna Destra: Live Feed e Donazione -->
+            <!-- Colonna Destra: Live Feed, Condivisione e Donazione -->
             <div class="space-y-6">
                 <!-- Live Camera Feed -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
                     <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
                     <div class="aspect-video bg-black rounded-md overflow-hidden">
-                        <iframe src="https://www.youtube.com/embed/86YLFOog4GM?autoplay=1&mute=1&controls=0" 
+                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/P9C25Un7flg?autoplay=1&mute=1&controls=1" 
                                 title="Live dalla Stazione Spaziale Internazionale"
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowfullscreen>
                         </iframe>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2 text-center">Live feed by NASA. Potrebbe essere nero durante il lato notturno o per perdita di segnale.</p>
+                    <div id="camera-buttons" class="flex justify-center space-x-2 mt-4">
+                        <button class="camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/P9C25Un7flg?autoplay=1&mute=1&controls=1">Vista Terra HD</button>
+                        <button class="camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/21X5lGlDOfg?autoplay=1&mute=1&controls=1">NASA TV</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il lato notturno.</p>
+                </div>
+
+                <!-- Condividi sui Social -->
+                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
+                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Condividi</h2>
+                    <div class="flex justify-around items-center">
+                        <a id="share-facebook" href="#" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su Facebook">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg>
+                        </a>
+                        <a id="share-twitter" href="#" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su X">
+                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a id="share-whatsapp" href="#" target="_blank" data-action="share/whatsapp/share" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su WhatsApp">
+                           <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.44 3.37 1.21 4.82l-1.33 4.85l4.95-1.3c1.4.73 2.99 1.15 4.68 1.15h.01c5.46 0 9.91-4.45 9.91-9.91c0-5.46-4.45-9.91-9.91-9.91zM17.52 15.3c-.28-.14-1.66-.82-1.92-.91c-.26-.1-.45-.14-.64.14c-.19.28-.73.91-.89 1.1c-.17.19-.33.21-.61.07c-.28-.14-1.18-.43-2.25-1.39c-.83-.72-1.39-1.62-1.55-1.89c-.17-.28-.02-.43.12-.57c.13-.13.28-.33.42-.49c.14-.17.19-.28.28-.47c.1-.19.05-.36-.02-.5c-.07-.14-.64-1.55-.87-2.12c-.23-.58-.47-.5-.64-.51h-.52c-.19 0-.49.07-.74.35c-.25.28-.97.95-.97 2.32c0 1.37.99 2.69 1.13 2.87c.14.19 1.97 3.14 4.77 4.2c.68.26 1.22.41 1.64.53c.6.17 1.15.14 1.58.09c.48-.07 1.66-.68 1.89-1.33c.23-.65.23-1.21.16-1.33c-.07-.12-.26-.19-.54-.33z"/></svg>
+                        </a>
+                        <button id="copy-link" class="text-gray-400 hover:text-white transition-colors" aria-label="Copia link">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        </button>
+                    </div>
+                    <p id="copy-feedback" class="text-xs text-emerald-400 mt-3 text-center h-4"></p>
                 </div>
 
                  <!-- Dona una Mancia -->
@@ -192,7 +220,7 @@
         function initGlobe() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight, 0.1, 3000);
-            camera.position.z = 250;
+            camera.position.z = 205;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
@@ -278,7 +306,7 @@
             clouds.rotation.y += 0.00006;
             stars.rotation.y += 0.00002;
             if (issMarker && issMarker.position.length() > 1) {
-                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(250);
+                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(205);
                 camera.position.lerp(desiredPosition, 0.03);
                 controls.target.set(0, 0, 0);
                 issMarker.lookAt(earth.position);
@@ -302,21 +330,18 @@
             return new THREE.Vector3(x, y, z);
         }
 
-        // Sostituisci questa funzione nel tuo index.html
         async function fetchGeminiInfo(lat, lon) {
-            console.log("Requesting info from Netlify function for:", lat, lon);
             domElements.geminiLoader.classList.remove('hidden');
             domElements.fetchGeminiBtn.disabled = true;
             domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // Il nuovo URL punta alla nostra funzione serverless
             const functionUrl = '/.netlify/functions/fetch-gemini-info';
             
             try {
                 const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lat, lon }) // Invia le coordinate alla funzione
+                    body: JSON.stringify({ lat, lon })
                 });
 
                 if (!response.ok) {
@@ -361,11 +386,60 @@
                 currentIssData = null;
             }
         }
+
+        function setupShareButtons() {
+            const pageUrl = window.location.href;
+            const shareText = encodeURIComponent("Segui la Stazione Spaziale in tempo reale con questo fantastico tracciatore 3D! 🛰️🌍");
+            const copyFeedbackEl = document.getElementById('copy-feedback');
+
+            document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+            document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${shareText}`;
+            document.getElementById('share-whatsapp').href = `whatsapp://send?text=${shareText}%20${encodeURIComponent(pageUrl)}`;
+
+            document.getElementById('copy-link').addEventListener('click', () => {
+                const textArea = document.createElement('textarea');
+                textArea.value = pageUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyFeedbackEl.textContent = 'Link copiato!';
+                } catch (err) {
+                    console.error('Impossibile copiare il link', err);
+                    copyFeedbackEl.textContent = 'Errore nella copia.';
+                }
+                document.body.removeChild(textArea);
+
+                setTimeout(() => {
+                    copyFeedbackEl.textContent = '';
+                }, 2000);
+            });
+        }
+
+        function setupCameraButtons() {
+            const feedFrame = document.getElementById('iss-live-feed');
+            const buttons = document.querySelectorAll('.camera-btn');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Cambia il feed video
+                    const newSrc = button.dataset.src;
+                    feedFrame.src = newSrc;
+
+                    // Aggiorna lo stile del pulsante attivo
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            });
+        }
         
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
+            setupShareButtons();
+            setupCameraButtons();
             setInterval(updateIssPosition, 5000);
+
             domElements.fetchGeminiBtn.addEventListener('click', () => {
                 if (currentIssData) {
                     fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
