@@ -220,7 +220,7 @@
         function initGlobe() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight, 0.1, 3000);
-            camera.position.z = 205;
+            camera.position.z = 180;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
@@ -235,7 +235,7 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 120;
+            controls.minDistance = 110;
             controls.maxDistance = 500;
             controls.autoRotate = false;
 
@@ -251,10 +251,34 @@
                 specular: new THREE.Color('grey'),
                 emissiveMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-night.jpg'),
                 emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 1.6
+                emissiveIntensity: 2.5
             });
             earth = new THREE.Mesh(earthGeometry, earthMaterial);
             scene.add(earth);
+
+            // --- Creazione Atmosfera ---
+            const atmosphereGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 4, 64, 64);
+            const atmosphereMaterial = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec3 vertexNormal;
+                    void main() {
+                        vertexNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vertexNormal;
+                    void main() {
+                        float intensity = pow(0.6 - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);
+                        gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide
+            });
+            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            scene.add(atmosphere);
+
 
             const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.5, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
@@ -306,7 +330,7 @@
             clouds.rotation.y += 0.00006;
             stars.rotation.y += 0.00002;
             if (issMarker && issMarker.position.length() > 1) {
-                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(205);
+                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(180);
                 camera.position.lerp(desiredPosition, 0.03);
                 controls.target.set(0, 0, 0);
                 issMarker.lookAt(earth.position);
