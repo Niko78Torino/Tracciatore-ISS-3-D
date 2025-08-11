@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracciatore ISS 3D con Dati da Gemini</title>
+    
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-8268426852108056">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8268426852108056"
+     crossorigin="anonymous"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- three.js e OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #globeContainer {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        #globeContainer:active {
+            cursor: grabbing;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            animation: spin 1s linear infinite;
+        }
+        /* Stile per il contenitore del video per mantenere l'aspect ratio */
+        .aspect-video {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        }
+        .aspect-video iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Sezione Principale con il Globo -->
+    <header class="w-full h-[60vh] md:h-[70vh] bg-gray-800 relative shadow-2xl">
+        <div id="globeContainer"></div>
+        <div class="absolute top-4 left-4 bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl">
+             <h1 class="text-2xl md:text-3xl font-bold text-cyan-400">Tracciatore ISS 3D</h1>
+             <p class="text-gray-300">Segui la Stazione Spaziale in tempo reale.</p>
+        </div>
+    </header>
+
+    <!-- Contenuto della Pagina -->
+    <main class="max-w-7xl mx-auto p-4 md:p-8">
+        
+        <!-- Griglia dei Contenuti Principali -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Colonna Sinistra: Dati e Curiosità -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Dati di Posizione -->
+                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
+                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Posizione Attuale</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div class="bg-gray-700/40 p-3 rounded-lg">
+                            <p class="text-gray-400">Latitudine:</p>
+                            <p id="lat" class="font-mono text-lg md:text-xl">--.--</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg">
+                            <p class="text-gray-400">Longitudine:</p>
+                            <p id="lon" class="font-mono text-lg md:text-xl">--.--</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg">
+                            <p class="text-gray-400">Altitudine:</p>
+                            <p id="alt" class="font-mono text-lg md:text-xl">---- km</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg">
+                            <p class="text-gray-400">Velocità:</p>
+                            <p id="vel" class="font-mono text-lg md:text-xl">---- km/h</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dati da Gemini -->
+                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Curiosità su richiesta</h2>
+                        <div id="gemini-container" class="flex-grow relative min-h-[120px] bg-gray-700/40 p-4 rounded-lg">
+                            <div id="gemini-loader" class="absolute inset-0 bg-gray-700/30 backdrop-blur-sm flex items-center justify-center rounded-md hidden">
+                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12" style="border-top-color: #22D3EE;"></div>
+                            </div>
+                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2">
+                                Clicca il pulsante per scoprire cosa sta sorvolando la ISS in questo momento.
+                            </div>
+                        </div>
+                    </div>
+                    <button id="fetch-gemini-btn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 shadow-md">
+                        Scopri cosa sorvola la ISS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Colonna Destra: Live Feed e Donazione -->
+            <div class="space-y-6">
+                <!-- Live Camera Feed -->
+                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
+                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
+                    <div class="aspect-video bg-black rounded-md overflow-hidden">
+                        <iframe src="https://www.youtube.com/embed/86YLFOog4GM?autoplay=1&mute=1&controls=0" 
+                                title="Live dalla Stazione Spaziale Internazionale"
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Live feed by NASA. Potrebbe essere nero durante il lato notturno o per perdita di segnale.</p>
+                </div>
+
+                 <!-- Dona una Mancia -->
+                <div class="bg-emerald-600/20 p-6 rounded-xl shadow-lg text-center">
+                    <h2 class="font-semibold text-xl mb-4 text-emerald-300">Sostieni il Progetto</h2>
+                    <a href="https://buy.stripe.com/7sY4gBakN6le8Ji41cdjO0d" target="_blank" class="w-full inline-block bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 shadow-lg">
+                        DONA una Mancia
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spazio per Banner Pubblicitario -->
+        <div class="my-8 h-48 bg-gray-800/50 rounded-xl shadow-lg">
+            <!-- Il codice AdSense andrà qui -->
+        </div>
+
+        <!-- Disclaimer e Privacy -->
+        <div class="bg-gray-800/50 p-6 rounded-xl text-sm text-gray-400 space-y-3 shadow-lg">
+            <h3 class="font-semibold text-lg text-gray-300">Disclaimer e Privacy</h3>
+            <p>Questa applicazione è fornita solo a scopo educativo e di intrattenimento. I dati sulla posizione sono forniti da un'API di terze parti e non ne è garantita l'accuratezza assoluta. Le informazioni generate da Gemini sono prodotte da un'intelligenza artificiale e potrebbero contenere imprecisioni.</p>
+            <p class="font-semibold">Questa applicazione rispetta la tua privacy: non vengono raccolti, tracciati o memorizzati dati personali degli utenti.</p>
+        </div>
+    </main>
+
+     <!-- Footer -->
+    <footer class="text-center text-xs text-cyan-400 py-8 space-y-1">
+        <p>Copyright &copy; 2025 Nicola Nicolaci. Tutti i diritti riservati.</p>
+        <p>
+            Posizione ISS da <a href="https://wheretheiss.at/" target="_blank" class="underline hover:text-cyan-300">wheretheiss.at</a>
+        </p>
+        <p>Sviluppato con Gemini & three.js</p>
+    </footer>
+
+    <script>
+        // --- SETUP ---
+        const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
+        const domElements = {
+            lat: document.getElementById('lat'),
+            lon: document.getElementById('lon'),
+            alt: document.getElementById('alt'),
+            vel: document.getElementById('vel'),
+            geminiData: document.getElementById('gemini-data'),
+            geminiLoader: document.getElementById('gemini-loader'),
+            globeContainer: document.getElementById('globeContainer'),
+            fetchGeminiBtn: document.getElementById('fetch-gemini-btn')
+        };
+        
+        let currentIssData = null;
+
+        // --- THREE.JS SETUP ---
+        let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
+        const EARTH_RADIUS = 100;
+
+        function initGlobe() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight, 0.1, 3000);
+            camera.position.z = 250;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            domElements.globeContainer.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xcccccc, 0.6));
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            directionalLight.position.set(-100, 30, 50);
+            scene.add(directionalLight);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 120;
+            controls.maxDistance = 500;
+            controls.autoRotate = false;
+
+            const loader = new THREE.TextureLoader();
+
+            const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-day.jpg'),
+                bumpMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-topology.png'),
+                bumpScale: 0.05,
+                specularMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-water.png'),
+                specular: new THREE.Color('grey'),
+                emissiveMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-night.jpg'),
+                emissive: new THREE.Color(0xffffff),
+                emissiveIntensity: 1.6
+            });
+            earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
+
+            const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.5, 64, 64);
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-clouds.png'),
+                transparent: true,
+                opacity: 0.4
+            });
+            clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            scene.add(clouds);
+
+            issMarker = new THREE.Group();
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcb4335, metalness: 0.7, roughness: 0.3 });
+            const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 6, 16);
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.rotation.z = Math.PI / 2;
+            issMarker.add(body);
+
+            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x943126, metalness: 0.1, roughness: 0.8, side: THREE.DoubleSide });
+            const panelGeometry = new THREE.BoxGeometry(8, 4, 0.1);
+            const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel1.position.x = 6;
+            issMarker.add(panel1);
+            const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel2.position.x = -6;
+            issMarker.add(panel2);
+            issMarker.scale.set(0.35, 0.35, 0.35); 
+            scene.add(issMarker);
+            
+            const starVertices = [];
+            for (let i = 0; i < 20000; i++) {
+                const x = THREE.MathUtils.randFloatSpread(4000);
+                const y = THREE.MathUtils.randFloatSpread(4000);
+                const z = THREE.MathUtils.randFloatSpread(4000);
+                starVertices.push(x, y, z);
+            }
+            const starGeometry = new THREE.BufferGeometry();
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.9 });
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            animate();
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            earth.rotation.y += 0.00005;
+            clouds.rotation.y += 0.00006;
+            stars.rotation.y += 0.00002;
+            if (issMarker && issMarker.position.length() > 1) {
+                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(250);
+                camera.position.lerp(desiredPosition, 0.03);
+                controls.target.set(0, 0, 0);
+                issMarker.lookAt(earth.position);
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
+        }
+        
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            return new THREE.Vector3(x, y, z);
+        }
+
+        // Sostituisci questa funzione nel tuo index.html
+        async function fetchGeminiInfo(lat, lon) {
+            console.log("Requesting info from Netlify function for:", lat, lon);
+            domElements.geminiLoader.classList.remove('hidden');
+            domElements.fetchGeminiBtn.disabled = true;
+            domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Il nuovo URL punta alla nostra funzione serverless
+            const functionUrl = '/.netlify/functions/fetch-gemini-info';
+            
+            try {
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lat, lon }) // Invia le coordinate alla funzione
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Errore dalla funzione serverless: status ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.text) {
+                    domElements.geminiData.innerHTML = result.text.replace(/\n/g, '<br>');
+                } else {
+                    throw new Error("Risposta non valida dalla funzione serverless.");
+                }
+
+            } catch (error) {
+                console.error("Errore nel chiamare la funzione Netlify:", error);
+                domElements.geminiData.textContent = "Impossibile contattare il server. Riprova tra poco.";
+            } finally {
+                domElements.geminiLoader.classList.add('hidden');
+                domElements.fetchGeminiBtn.disabled = false;
+                domElements.fetchGeminiBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        async function updateIssPosition() {
+            try {
+                const response = await fetch(issApiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                currentIssData = data;
+                const { latitude, longitude, altitude, velocity } = data;
+                domElements.lat.textContent = latitude.toFixed(4);
+                domElements.lon.textContent = longitude.toFixed(4);
+                domElements.alt.textContent = `${altitude.toFixed(2)} km`;
+                domElements.vel.textContent = `${velocity.toFixed(2)} km/h`;
+                const issRadius = EARTH_RADIUS + (altitude / 100);
+                issMarker.position.copy(latLonToVector3(latitude, longitude, issRadius));
+            } catch (error) {
+                console.error('Errore nel recuperare i dati della ISS:', error);
+                domElements.lat.textContent = "Errore";
+                domElements.lon.textContent = "Errore";
+                currentIssData = null;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initGlobe();
+            updateIssPosition();
+            setInterval(updateIssPosition, 5000);
+            domElements.fetchGeminiBtn.addEventListener('click', () => {
+                if (currentIssData) {
+                    fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
+                } else {
+                    domElements.geminiData.textContent = "Dati di posizione non ancora disponibili. Attendi qualche secondo e riprova.";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
