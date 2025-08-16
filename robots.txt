@@ -1,4 +1,4 @@
 User-agent: *
-Allow: /
+Allow:
 
 Sitemap: https://www.spazio3d.com/sitemap.xml
