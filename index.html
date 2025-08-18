@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracciatore ISS 3D con Dati da Gemini</title>
+    <title>Tracciatore ISS 3D Avanzato con Orbita</title>
     
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-8268426852108056">
@@ -25,6 +25,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
         #globeContainer {
             width: 100%;
@@ -45,7 +46,6 @@
         .loader {
             animation: spin 1s linear infinite;
         }
-        /* Stile per il contenitore del video per mantenere l'aspect ratio */
         .aspect-video {
             position: relative;
             width: 100%;
@@ -58,9 +58,10 @@
             width: 100%;
             height: 100%;
         }
-        .camera-btn.active {
+        .control-btn.active {
             background-color: #06b6d4; /* cyan-500 */
             color: white;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
         }
     </style>
 </head>
@@ -74,9 +75,15 @@
         </p>
     </div>
 
-    <!-- Sezione Principale con il Globo -->
+    <!-- Sezione Principale con il Globo e Controlli -->
     <header class="w-full h-[70vh] md:h-[80vh] bg-gray-800 relative shadow-2xl rounded-xl mx-auto max-w-7xl">
         <div id="globeContainer" class="rounded-xl overflow-hidden"></div>
+        <!-- Controlli sovrapposti al globo -->
+        <div class="absolute top-4 right-4 z-10">
+            <button id="follow-iss-btn" class="control-btn active bg-gray-700/80 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                Insegui ISS
+            </button>
+        </div>
     </header>
 
     <!-- Contenuto della Pagina -->
@@ -143,8 +150,8 @@
                         </iframe>
                     </div>
                     <div id="camera-buttons" class="flex justify-center space-x-2 mt-4">
-                        <button class="camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/H999s0P1Er0?autoplay=1&mute=1&controls=1">Vista Terra 1</button>
-                        <button class="camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/DIgkvm2nmHc?autoplay=1&mute=1&controls=1">Vista Terra 2</button>
+                        <button class="control-btn camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/H999s0P1Er0?autoplay=1&mute=1&controls=1">Vista Terra 1</button>
+                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/DIgkvm2nmHc?autoplay=1&mute=1&controls=1">Vista Terra 2</button>
                     </div>
                     <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il lato notturno.</p>
                 </div>
@@ -206,7 +213,7 @@
         </div>
     </main>
 
-     <!-- Footer -->
+    <!-- Footer -->
     <footer class="text-center text-xs text-cyan-400 py-8 space-y-1">
         <p>Copyright &copy; 2025 Nicola Nicolaci. Tutti i diritti riservati.</p>
         <p>
@@ -226,13 +233,15 @@
             geminiData: document.getElementById('gemini-data'),
             geminiLoader: document.getElementById('gemini-loader'),
             globeContainer: document.getElementById('globeContainer'),
-            fetchGeminiBtn: document.getElementById('fetch-gemini-btn')
+            fetchGeminiBtn: document.getElementById('fetch-gemini-btn'),
+            followIssBtn: document.getElementById('follow-iss-btn')
         };
         
         let currentIssData = null;
+        let followIss = true; // NUOVO: Stato per l'inseguimento della camera
 
         // --- IMPOSTAZIONI THREE.JS ---
-        let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
+        let scene, camera, renderer, controls, earth, issMarker, stars, clouds, orbitLine;
         const EARTH_RADIUS = 100;
 
         function initGlobe() {
@@ -256,13 +265,19 @@
             controls.minDistance = 110;
             controls.maxDistance = 500;
             controls.autoRotate = false;
+            
+            // NUOVO: Disabilita l'inseguimento se l'utente interagisce
+            controls.addEventListener('start', () => {
+                followIss = false;
+                domElements.followIssBtn.classList.remove('active');
+            });
 
             const loader = new THREE.TextureLoader();
 
             const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
             const earthMaterial = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
-                map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-day.jpg'),
+                map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-day.jpg', undefined, undefined, () => { console.error('Errore nel caricamento della texture della Terra'); }),
                 bumpMap: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-topology.png'),
                 bumpScale: 0.05,
                 specularMap: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-water.png'),
@@ -297,7 +312,6 @@
             const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
             scene.add(atmosphere);
 
-
             const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.5, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-clouds.png'),
@@ -307,22 +321,8 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
-            issMarker = new THREE.Group();
-            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcb4335, metalness: 0.7, roughness: 0.3 });
-            const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 6, 16);
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.rotation.z = Math.PI / 2;
-            issMarker.add(body);
-
-            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x283747, metalness: 0.9, roughness: 0.2, side: THREE.DoubleSide });
-            const panelGeometry = new THREE.BoxGeometry(8, 4, 0.1);
-            const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
-            panel1.position.x = 6;
-            issMarker.add(panel1);
-            const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
-            panel2.position.x = -6;
-            issMarker.add(panel2);
-            issMarker.scale.set(0.35, 0.35, 0.35); 
+            // NUOVO: Modello ISS più dettagliato
+            issMarker = createDetailedIssModel();
             scene.add(issMarker);
             
             const starVertices = [];
@@ -341,6 +341,48 @@
             animate();
             window.addEventListener('resize', onWindowResize);
         }
+        
+        // NUOVO: Funzione per creare un modello ISS più dettagliato
+        function createDetailedIssModel() {
+            const issGroup = new THREE.Group();
+            
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.4 });
+            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x283747, metalness: 0.9, roughness: 0.2, side: THREE.DoubleSide });
+            const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.3 });
+
+            // Truss (struttura centrale)
+            const trussGeometry = new THREE.BoxGeometry(12, 0.5, 0.5);
+            const truss = new THREE.Mesh(trussGeometry, bodyMaterial);
+            issGroup.add(truss);
+
+            // Moduli abitativi
+            const moduleGeometry = new THREE.CylinderGeometry(0.8, 0.8, 2, 16);
+            const mainModule = new THREE.Mesh(moduleGeometry, bodyMaterial);
+            mainModule.rotation.x = Math.PI / 2;
+            issGroup.add(mainModule);
+            
+            const sideModule1 = new THREE.Mesh(moduleGeometry, goldMaterial);
+            sideModule1.scale.set(0.6, 0.6, 0.6);
+            sideModule1.position.z = 1.5;
+            issGroup.add(sideModule1);
+
+            // Pannelli solari
+            const panelGeometry = new THREE.BoxGeometry(8, 3, 0.1);
+            for(let i = 0; i < 2; i++) {
+                const sign = i === 0 ? 1 : -1;
+                const panelArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3, 8), bodyMaterial);
+                panelArm.position.x = sign * 4;
+                panelArm.rotation.z = Math.PI / 2;
+                issGroup.add(panelArm);
+                
+                const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
+                panel1.position.x = sign * 8;
+                issGroup.add(panel1);
+            }
+            
+            issGroup.scale.set(0.35, 0.35, 0.35);
+            return issGroup;
+        }
 
         function animate() {
             requestAnimationFrame(animate);
@@ -348,17 +390,14 @@
             clouds.rotation.y += 0.00006;
             stars.rotation.y += 0.00002;
             
-            // Logica per seguire la telecamera
-            if (issMarker && issMarker.position.length() > 1) {
-                // Interpola dolcemente la posizione della telecamera verso un punto dietro la ISS
+            if (followIss && issMarker && issMarker.position.length() > 1) {
                 const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(180);
-                camera.position.lerp(desiredPosition, 0.02); 
-                
-                // Assicura che la telecamera guardi sempre il centro della Terra
+                camera.position.lerp(desiredPosition, 0.02);
                 controls.target.set(0, 0, 0);
-                
-                // Fa in modo che il modello della ISS "guardi" il centro della Terra per orientarsi
-                issMarker.lookAt(earth.position);
+            }
+             
+            if (issMarker) {
+                 issMarker.lookAt(earth.position);
             }
             
             controls.update();
@@ -380,23 +419,56 @@
             return new THREE.Vector3(x, y, z);
         }
 
-        async function fetchGeminiInfo(lat, lon) {
+        // NUOVO: Funzione per disegnare l'orbita
+        async function drawOrbit() {
+            try {
+                // Rimuovi la vecchia orbita se esiste
+                if (orbitLine) {
+                    scene.remove(orbitLine);
+                    orbitLine.geometry.dispose();
+                    orbitLine.material.dispose();
+                }
+
+                // Ottieni i dati orbitali per i prossimi 90 minuti
+                const timestamps = [];
+                for (let i = 0; i < 90; i += 3) { // un punto ogni 3 minuti
+                    timestamps.push(Math.floor(Date.now() / 1000) + i * 60);
+                }
+                const orbitApiUrl = `${issApiUrl}?timestamps=${timestamps.join(',')}`;
+                const response = await fetch(orbitApiUrl);
+                if (!response.ok) throw new Error('Errore nel recuperare i dati orbitali');
+                const orbitData = await response.json();
+
+                const points = [];
+                const avgAltitude = orbitData.reduce((acc, p) => acc + p.altitude, 0) / orbitData.length;
+                const orbitRadius = EARTH_RADIUS + (avgAltitude / 100);
+
+                orbitData.forEach(pos => {
+                    points.push(latLonToVector3(pos.latitude, pos.longitude, orbitRadius));
+                });
+                // Aggiungi il primo punto alla fine per chiudere il loop
+                if(points.length > 0) points.push(points[0].clone());
+
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.7 });
+                orbitLine = new THREE.Line(geometry, material);
+                scene.add(orbitLine);
+
+            } catch (error) {
+                console.error("Impossibile disegnare l'orbita:", error);
+            }
+        }
+
+        // AGGIORNATO: Funzione fetch Gemini con retry
+        async function fetchGeminiInfo(lat, lon, retries = 3, delay = 1000) {
             domElements.geminiLoader.classList.remove('hidden');
             domElements.fetchGeminiBtn.disabled = true;
             domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // IMPORTANTE: Non è richiesta una chiave API per questo modello.
-            // L'ambiente gestirà automaticamente l'autenticazione.
             const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            
             const prompt = `Sei un assistente esperto di geografia. La Stazione Spaziale Internazionale si trova attualmente sopra le coordinate geografiche: Latitudine ${lat.toFixed(4)}, Longitudine ${lon.toFixed(4)}. Descrivi in modo interessante e conciso (massimo 3-4 frasi) cosa sta sorvolando in questo momento. Potrebbe essere un oceano, una città, una catena montuosa o un deserto. Fornisci qualche curiosità sul luogo, se pertinente. Rispondi in italiano.`;
-
-            const payload = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            };
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
             try {
                 const response = await fetch(apiUrl, {
@@ -406,18 +478,20 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 429 && retries > 0) { // Too Many Requests
+                        console.warn(`API Gemini: Rate limit. Riprovo tra ${delay / 1000}s... Tentativi rimasti: ${retries - 1}`);
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchGeminiInfo(lat, lon, retries - 1, delay * 2); // Exponential backoff
+                    }
                     throw new Error(`Errore dall'API Gemini: status ${response.status}`);
                 }
                 
                 const result = await response.json();
                 
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
+                if (result.candidates && result.candidates[0]?.content?.parts?.[0]) {
                     const text = result.candidates[0].content.parts[0].text;
                     domElements.geminiData.innerHTML = text.replace(/\n/g, '<br>');
                 } else {
-                    // Gestisce i casi in cui la risposta dell'API ha successo ma è vuota o malformata.
                     throw new Error("Risposta non valida o vuota dall'API Gemini.");
                 }
 
@@ -442,7 +516,7 @@
                 domElements.lon.textContent = longitude.toFixed(4);
                 domElements.alt.textContent = `${altitude.toFixed(2)} km`;
                 domElements.vel.textContent = `${velocity.toFixed(2)} km/h`;
-                // Scala l'altitudine per la visualizzazione
+                
                 const issRadius = EARTH_RADIUS + (altitude / 100); 
                 issMarker.position.copy(latLonToVector3(latitude, longitude, issRadius));
             } catch (error) {
@@ -468,7 +542,6 @@
                 document.body.appendChild(textArea);
                 textArea.select();
                 try {
-                    // Usa execCommand come fallback per una maggiore compatibilità negli iFrame
                     document.execCommand('copy');
                     copyFeedbackEl.textContent = 'Link copiato!';
                 } catch (err) {
@@ -477,9 +550,7 @@
                 }
                 document.body.removeChild(textArea);
 
-                setTimeout(() => {
-                    copyFeedbackEl.textContent = '';
-                }, 2000);
+                setTimeout(() => { copyFeedbackEl.textContent = ''; }, 2000);
             });
         }
 
@@ -489,13 +560,10 @@
             
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
-                    // Cambia la sorgente del feed video
                     const newSrc = button.dataset.src;
                     if (feedFrame.src !== newSrc) {
                         feedFrame.src = newSrc;
                     }
-
-                    // Aggiorna lo stile del pulsante attivo
                     buttons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 });
@@ -505,15 +573,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
+            drawOrbit();
             setupShareButtons();
             setupCameraButtons();
+            
             setInterval(updateIssPosition, 5000);
+            setInterval(drawOrbit, 5 * 60 * 1000); // Aggiorna l'orbita ogni 5 minuti
 
             domElements.fetchGeminiBtn.addEventListener('click', () => {
                 if (currentIssData) {
                     fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
                 } else {
                     domElements.geminiData.textContent = "Dati di posizione non ancora disponibili. Attendi qualche secondo e riprova.";
+                }
+            });
+            
+            // NUOVO: Event listener per il pulsante di inseguimento
+            domElements.followIssBtn.addEventListener('click', () => {
+                followIss = !followIss;
+                domElements.followIssBtn.classList.toggle('active', followIss);
+                if (followIss) {
+                    controls.autoRotate = false; // Ferma la rotazione automatica se attiva
                 }
             });
         });
