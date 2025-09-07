@@ -13,10 +13,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- three.js e OrbitControls -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,7 +138,7 @@
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
                     <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
                     <div class="aspect-video bg-black rounded-md overflow-hidden">
-                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/H999s0P1Er0?autoplay=1&mute=1&controls=1" 
+                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1&controls=1" 
                                 title="Live dalla Stazione Spaziale Internazionale"
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -150,8 +146,9 @@
                         </iframe>
                     </div>
                     <div id="camera-buttons" class="flex justify-center space-x-2 mt-4">
-                        <button class="control-btn camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/H999s0P1Er0?autoplay=1&mute=1&controls=1">Vista Terra 1</button>
-                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/DIgkvm2nmHc?autoplay=1&mute=1&controls=1">Vista Terra 2</button>
+                        <button class="control-btn camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1&controls=1">Live Esterno</button>
+                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/b7SMy-uLJlU?autoplay=1&mute=1&controls=1">Live Interno/Misto</button>
+                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/0FBiyFpV__g?autoplay=1&mute=1&controls=1">NASA TV</button>
                     </div>
                     <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il lato notturno.</p>
                 </div>
@@ -222,7 +219,20 @@
         <p>Sviluppato con Gemini & three.js</p>
     </footer>
 
-    <script>
+    <!-- three.js e OrbitControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+                "OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
+
         // --- IMPOSTAZIONI ---
         const issApiUrl = 'https://corsproxy.io/?https://api.wheretheiss.at/v1/satellites/25544';
         const domElements = {
@@ -238,7 +248,7 @@
         };
         
         let currentIssData = null;
-        let followIss = true; // NUOVO: Stato per l'inseguimento della camera
+        let followIss = true; // Stato per l'inseguimento della camera
 
         // --- IMPOSTAZIONI THREE.JS ---
         let scene, camera, renderer, controls, earth, issMarker, stars, clouds, orbitLine;
@@ -259,14 +269,14 @@
             directionalLight.position.set(-100, 30, 50);
             scene.add(directionalLight);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.minDistance = 110;
             controls.maxDistance = 500;
             controls.autoRotate = false;
             
-            // NUOVO: Disabilita l'inseguimento se l'utente interagisce
+            // Disabilita l'inseguimento se l'utente interagisce
             controls.addEventListener('start', () => {
                 followIss = false;
                 domElements.followIssBtn.classList.remove('active');
@@ -321,7 +331,7 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
-            // NUOVO: Modello ISS più dettagliato
+            // Modello ISS più dettagliato
             issMarker = createDetailedIssModel();
             scene.add(issMarker);
             
@@ -342,7 +352,7 @@
             window.addEventListener('resize', onWindowResize);
         }
         
-        // NUOVO: Funzione per creare un modello ISS più dettagliato
+        // Funzione per creare un modello ISS più dettagliato
         function createDetailedIssModel() {
             const issGroup = new THREE.Group();
             
@@ -395,7 +405,7 @@
                 camera.position.lerp(desiredPosition, 0.02);
                 controls.target.set(0, 0, 0);
             }
-             
+                
             if (issMarker) {
                  issMarker.lookAt(earth.position);
             }
@@ -419,7 +429,7 @@
             return new THREE.Vector3(x, y, z);
         }
 
-        // NUOVO: Funzione per disegnare l'orbita
+        // Funzione per disegnare l'orbita
         async function drawOrbit() {
             try {
                 // Rimuovi la vecchia orbita se esiste
@@ -459,7 +469,7 @@
             }
         }
 
-        // AGGIORNATO: Funzione fetch Gemini con retry
+        // Funzione fetch Gemini con retry
         async function fetchGeminiInfo(lat, lon, retries = 3, delay = 1000) {
             domElements.geminiLoader.classList.remove('hidden');
             domElements.fetchGeminiBtn.disabled = true;
@@ -588,7 +598,7 @@
                 }
             });
             
-            // NUOVO: Event listener per il pulsante di inseguimento
+            // Event listener per il pulsante di inseguimento
             domElements.followIssBtn.addEventListener('click', () => {
                 followIss = !followIss;
                 domElements.followIssBtn.classList.toggle('active', followIss);
@@ -600,3 +610,4 @@
     </script>
 </body>
 </html>
+
