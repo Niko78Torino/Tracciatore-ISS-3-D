@@ -67,7 +67,7 @@
     <div class="max-w-4xl mx-auto text-center py-8 px-4">
         <h1 class="text-3xl md:text-4xl font-bold text-cyan-400">Tracciatore ISS 3D: La Tua Finestra sullo Spazio</h1>
         <p class="text-gray-300 mt-4">
-            Benvenuto nel nostro avanzato Tracciatore ISS 3D. Questa applicazione ti offre un'esperienza immersiva unica, permettendoti di seguire in tempo reale il viaggio della Stazione Spaziale Internazionale attorno alla Terra. Grazie a una visualizzazione 3D interattiva e a dati costantemente aggiornati, potrai esplorare la sua orbita, scoprire la sua posizione esatta e vedere il mondo dalla prospettiva di un astronauta. È uno strumento perfetto per studenti, educatori e tutti gli appassionati di spazio che desiderano connettersi con l'esplorazione spaziale in modo diretto e coinvolgente.
+            Benvenuto nel nostro avanzato Tracciatore ISS 3D. Questa applicazione ti offre un'esperienza immersiva unica, permettendoti di seguire in tempo reale il viaggio della Stazione Spaziale Internazionale attorno alla Terra. Grazie a una visualizzazione 3D interattiva e a dati costantemente aggiornati, potrai esplorare la sua orbita, scoprire la sua posizione esatta e vedere il mondo dalla prospettiva di un astronauta. È uno strumento perfetto per studenti, educatori e tutti gli appassionati di spazio che desiderano connettersi con l'esplorazione spaziale in modo directo e coinvolgente.
         </p>
     </div>
 
@@ -134,23 +134,23 @@
 
             <!-- Colonna Destra: Live Feed, Condivisione e Donazione -->
             <div class="space-y-6">
-                <!-- Live Camera Feed -->
+                <!-- Live Camera Feed (Utilizza il feed live dinamico basato sul canale di NASA Johnson) -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
                     <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
                     <div class="aspect-video bg-black rounded-md overflow-hidden">
-                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1&controls=1" 
+                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/live_stream?channel=UCq0818vTshXbT57bcaPrXgQ&autoplay=1&mute=1&controls=1" 
                                 title="Live dalla Stazione Spaziale Internazionale"
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowfullscreen>
                         </iframe>
                     </div>
-                    <div id="camera-buttons" class="flex justify-center space-x-2 mt-4">
-                        <button class="control-btn camera-btn active text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1&controls=1">Live Esterno</button>
-                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/b7SMy-uLJlU?autoplay=1&mute=1&controls=1">Live Interno/Misto</button>
-                        <button class="control-btn camera-btn text-xs py-1 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/0FBiyFpV__g?autoplay=1&mute=1&controls=1">NASA TV</button>
+                    <div id="camera-buttons" class="flex flex-wrap justify-center gap-2 mt-4">
+                        <button class="control-btn camera-btn active text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UCq0818vTshXbT57bcaPrXgQ&autoplay=1&mute=1&controls=1">Live Esterno</button>
+                        <button class="control-btn camera-btn text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UC5m9v395066SOnL6sc3V4fg&autoplay=1&mute=1&controls=1">Live Interno/Misto</button>
+                        <button class="control-btn camera-btn text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UCO5S7_F46vSgWvD6v2K7n8w&autoplay=1&mute=1&controls=1">NASA TV</button>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il lato notturno.</p>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il passaggio nell'ombra terrestre.</p>
                 </div>
 
                 <!-- Condividi sui Social -->
@@ -192,7 +192,7 @@
                 </p>
                 <p>
                     <strong>Cosa puoi fare?</strong>
-                    Usa il nostro strumento per un'esperienza completa: guarda il modello della ISS muoversi su un globo realistico, visualizza dati in tempo reale come altitudine e velocità, e con un solo clic, sfrutta l'intelligenza artificiale di <strong>Gemini</strong> per scoprire dettagli affascinanti sul luogo che la stazione sta sorvolando. Che sia una metropoli, un deserto o l'oceano, riceverai curiosità e contesto geografico all'istante. Inoltre, puoi sintonizzarti sul <strong>feed video in diretta</strong> dalle telecamere della ISS. Questo strumento è perfetto per appassionati di spazio, studenti e chiunque sia curioso del nostro mondo.
+                    Usa il nostro strumento per un'esperienza completa: guarda il modello della ISS muoversi su un globo realistico, visualizza dati in tempo reale come altitudine e velocità, e con un solo clic, supera l'intelligenza artificiale di <strong>Gemini</strong> per scoprire dettagli affascinanti sul luogo che la stazione sta sorvolando. Che sia una metropoli, un deserto o l'oceano, riceverai curiosità e contesto geografico all'istante. Inoltre, puoi sintonizzarti sul <strong>feed video in diretta</strong> dalle telecamere della ISS. Questo strumento è perfetto per appassionati di spazio, studenti e chiunque sia curioso del nostro mondo.
                 </p>
             </div>
         </div>
@@ -235,7 +235,6 @@
         import { OrbitControls } from 'OrbitControls';
 
         // --- IMPOSTAZIONI ---
-        const issApiUrl = 'https://corsproxy.io/?https://api.wheretheiss.at/v1/satellites/25544';
         const domElements = {
             lat: document.getElementById('lat'),
             lon: document.getElementById('lon'),
@@ -254,6 +253,30 @@
         // --- IMPOSTAZIONI THREE.JS ---
         let scene, camera, renderer, controls, earth, issMarker, stars, clouds, orbitLine;
         const EARTH_RADIUS = 100;
+
+        // Funzione helper robusta per recuperare dati dall'API della ISS.
+        // Interroga prima l'API ufficiale diretta (con supporto CORS nativo).
+        // Se fallisce, utilizza la connessione proxy come fallback, eseguendo l'URL encoding dei parametri.
+        async function fetchIss(queryParams = '') {
+            const directUrl = `https://api.wheretheiss.at/v1/satellites/25544${queryParams}`;
+            try {
+                const response = await fetch(directUrl);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (err) {
+                console.warn("Chiamata diretta all'API ISS fallita, provo con il proxy...", err);
+            }
+
+            // Fallback sul proxy con codifica URI corretta dei parametri per impedire risposte anomale dal proxy
+            const targetUrl = `https://api.wheretheiss.at/v1/satellites/25544${queryParams}`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error('La risposta della rete non era ok');
+            }
+            return await response.json();
+        }
 
         function initGlobe() {
             scene = new THREE.Scene();
@@ -285,6 +308,7 @@
 
             const loader = new THREE.TextureLoader();
 
+            // Mantenuta la terra originale come richiesto
             const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
             const earthMaterial = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
@@ -323,6 +347,7 @@
             const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
             scene.add(atmosphere);
 
+            // Mantenute le nuvole originali
             const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.5, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-clouds.png'),
@@ -332,7 +357,7 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
-            // Modello ISS più dettagliato
+            // Modello ISS dettagliato
             issMarker = createDetailedIssModel();
             scene.add(issMarker);
             
@@ -353,7 +378,7 @@
             window.addEventListener('resize', onWindowResize);
         }
         
-        // Funzione per creare un modello ISS più dettagliato
+        // Funzione per creare un modello ISS dettagliato
         function createDetailedIssModel() {
             const issGroup = new THREE.Group();
             
@@ -430,7 +455,7 @@
             return new THREE.Vector3(x, y, z);
         }
 
-        // Funzione per disegnare l'orbita
+        // Funzione per disegnare l'orbita corretta (limite di 10 punti temporali per wheretheiss API)
         async function drawOrbit() {
             try {
                 // Rimuovi la vecchia orbita se esiste
@@ -440,15 +465,20 @@
                     orbitLine.material.dispose();
                 }
 
-                // Ottieni i dati orbitali per i prossimi 90 minuti
+                // Ottieni i dati orbitali per i prossimi 90 minuti (10 punti temporali totali per non sforare i limiti API)
                 const timestamps = [];
-                for (let i = 0; i < 90; i += 3) { // un punto ogni 3 minuti
-                    timestamps.push(Math.floor(Date.now() / 1000) + i * 60);
+                const now = Math.floor(Date.now() / 1000);
+                for (let i = 0; i < 10; i++) {
+                    timestamps.push(now + i * 9 * 60); // 10 punti distanziati di 9 minuti l'uno dall'altro = 90 minuti complessivi
                 }
-                const orbitApiUrl = `${issApiUrl}?timestamps=${timestamps.join(',')}`;
-                const response = await fetch(orbitApiUrl);
-                if (!response.ok) throw new Error('Errore nel recuperare i dati orbitali');
-                const orbitData = await response.json();
+                
+                // Utilizza il sistema di fetch unificato per l'API dell'orbita
+                const orbitData = await fetchIss(`?timestamps=${timestamps.join(',')}`);
+
+                // Controllo difensivo per verificare che orbitData sia effettivamente un array
+                if (!Array.isArray(orbitData)) {
+                    throw new Error("I dati orbitali ricevuti non sono in un formato Array valido.");
+                }
 
                 const points = [];
                 const avgAltitude = orbitData.reduce((acc, p) => acc + p.altitude, 0) / orbitData.length;
@@ -470,7 +500,7 @@
             }
         }
 
-        // Funzione fetch Gemini con retry
+        // Funzione originale fetch Gemini per Netlify (non modificata per la gestione delle chiavi)
         async function fetchGeminiInfo(lat, lon, retries = 3, delay = 1000) {
             domElements.geminiLoader.classList.remove('hidden');
             domElements.fetchGeminiBtn.disabled = true;
@@ -518,9 +548,8 @@
 
         async function updateIssPosition() {
             try {
-                const response = await fetch(issApiUrl);
-                if (!response.ok) throw new Error('La risposta della rete non era ok');
-                const data = await response.json();
+                // Utilizza il sistema di fetch unificato ed auto-resiliente
+                const data = await fetchIss();
                 currentIssData = data;
                 const { latitude, longitude, altitude, velocity } = data;
                 domElements.lat.textContent = latitude.toFixed(4);
@@ -584,7 +613,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
-            drawOrbit();
+            
+            // Disegna l'orbita iniziale
+            setTimeout(drawOrbit, 1000);
+            
             setupShareButtons();
             setupCameraButtons();
             
@@ -611,4 +643,3 @@
     </script>
 </body>
 </html>
-
