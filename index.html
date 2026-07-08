@@ -59,6 +59,12 @@
             color: white;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
         }
+        /* Stili per evidenziare la query AI attiva */
+        .ai-tab-btn.active {
+            background-color: #06b6d4;
+            color: white;
+            border-color: #06b6d4;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -113,28 +119,49 @@
                     </div>
                 </div>
 
-                <!-- Dati da Gemini -->
+                <!-- Dati da Gemini (Evoluta in Console Multitasking) -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg flex flex-col justify-between">
                     <div>
-                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Curiosità su richiesta</h2>
-                        <div id="gemini-container" class="flex-grow relative min-h-[120px] bg-gray-700/40 p-4 rounded-lg">
-                            <div id="gemini-loader" class="absolute inset-0 bg-gray-700/30 backdrop-blur-sm flex items-center justify-center rounded-md hidden">
-                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12" style="border-top-color: #22D3EE;"></div>
+                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Console di Bordo & IA Gemini</h2>
+                        <p class="text-xs text-gray-400 mb-4">Interroga l'intelligenza artificiale per ricevere dettagli scientifici, geografici e operativi in tempo reale.</p>
+                        
+                        <!-- Schermo di Output -->
+                        <div id="gemini-container" class="flex-grow relative min-h-[140px] bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 shadow-inner">
+                            <div id="gemini-loader" class="absolute inset-0 bg-gray-800/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-md hidden">
+                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10 mb-2" style="border-top-color: #22D3EE;"></div>
+                                <span class="text-xs text-cyan-400 font-medium">Collegamento satellitare con Gemini...</span>
                             </div>
-                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2">
-                                Clicca il pulsante per scoprire cosa sta sorvolando la ISS in questo momento.
+                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2 text-sm leading-relaxed">
+                                Seleziona uno dei canali di comunicazione qui sotto per iniziare la trasmissione dei dati.
                             </div>
                         </div>
                     </div>
-                    <button id="fetch-gemini-btn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 shadow-md">
-                        Scopri cosa sorvola la ISS
-                    </button>
+                    
+                    <!-- Griglia dei Pulsanti Interattivi -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+                        <button id="btn-overflying" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
+                            <span class="text-base">🌍</span>
+                            <span>Cosa sorvola?</span>
+                        </button>
+                        <button id="btn-crew" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
+                            <span class="text-base">🧑‍🚀</span>
+                            <span>Equipaggio</span>
+                        </button>
+                        <button id="btn-experiments" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
+                            <span class="text-base">🔬</span>
+                            <span>Esperimenti</span>
+                        </button>
+                        <button id="btn-life" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
+                            <span class="text-base">🛰️</span>
+                            <span>Vita a bordo</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Colonna Destra: Live Feed, Condivisione e Donazione -->
             <div class="space-y-6">
-                <!-- Live Camera Feed (Utilizza il feed live dinamico basato sul canale di NASA Johnson) -->
+                <!-- Live Camera Feed -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
                     <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
                     <div class="aspect-video bg-black rounded-md overflow-hidden">
@@ -243,8 +270,12 @@
             geminiData: document.getElementById('gemini-data'),
             geminiLoader: document.getElementById('gemini-loader'),
             globeContainer: document.getElementById('globeContainer'),
-            fetchGeminiBtn: document.getElementById('fetch-gemini-btn'),
-            followIssBtn: document.getElementById('follow-iss-btn')
+            followIssBtn: document.getElementById('follow-iss-btn'),
+            // Nuovi bottoni per i canali della console AI
+            btnOverflying: document.getElementById('btn-overflying'),
+            btnCrew: document.getElementById('btn-crew'),
+            btnExperiments: document.getElementById('btn-experiments'),
+            btnLife: document.getElementById('btn-life')
         };
         
         let currentIssData = null;
@@ -500,15 +531,30 @@
             }
         }
 
-        // Funzione originale fetch Gemini per Netlify (non modificata per la gestione delle chiavi)
-        async function fetchGeminiInfo(lat, lon, retries = 3, delay = 1000) {
+        // Funzione modificata per supportare più prompt in base alla selezione dell'utente
+        // Mantiene la struttura di chiamata API originale per funzionare perfettamente su Netlify
+        async function fetchGeminiInfo(lat, lon, queryType = 'overflying', retries = 3, delay = 1000) {
             domElements.geminiLoader.classList.remove('hidden');
-            domElements.fetchGeminiBtn.disabled = true;
-            domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            // Disabilita temporaneamente tutti i pulsanti della console
+            const buttons = [domElements.btnOverflying, domElements.btnCrew, domElements.btnExperiments, domElements.btnLife];
+            buttons.forEach(btn => btn.disabled = true);
 
             const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const prompt = `Sei un assistente esperto di geografia. La Stazione Spaziale Internazionale si trova attualmente sopra le coordinate geografiche: Latitudine ${lat.toFixed(4)}, Longitudine ${lon.toFixed(4)}. Descrivi in modo interessante e conciso (massimo 3-4 frasi) cosa sta sorvolando in questo momento. Potrebbe essere un oceano, una città, una catena montuosa o un deserto. Fornisci qualche curiosità sul luogo, se pertinente. Rispondi in italiano.`;
+            
+            // Genera il prompt ad-hoc in base all'interazione cliccata
+            let prompt = "";
+            if (queryType === 'overflying') {
+                prompt = `Sei un assistente esperto di geografia. La Stazione Spaziale Internazionale si trova attualmente sopra le coordinate geografiche: Latitudine ${lat.toFixed(4)}, Longitudine ${lon.toFixed(4)}. Descrivi in modo interessante e conciso (massimo 3-4 frasi) cosa sta sorvolando in questo momento. Potrebbe essere un oceano, una città, una catena montuosa o un deserto. Fornisci qualche curiosità sul luogo, se pertinente. Rispondi in italiano.`;
+            } else if (queryType === 'crew') {
+                prompt = `Sei l'Ufficiale alle Comunicazioni della ISS. Dimmi chi sono i membri principali dell'equipaggio della spedizione attualmente a bordo della Stazione Spaziale Internazionale (spedizione corrente nel 2026). Elenca brevemente i nomi di spicco, i ruoli e la loro nazionalità in modo chiaro, avvincente e conciso (massimo 4 frasi). Rispondi in italiano.`;
+            } else if (queryType === 'experiments') {
+                prompt = `Sei il Direttore Scientifico di bordo della ISS. Descrivi 2 o 3 esperimenti scientifici straordinari condotti attualmente in microgravità (ad esempio biologia spaziale, medicina o scienze dei materiali) spiegando come aiuteranno la vita sulla Terra o le future missioni su Marte. Sii conciso e affascinante (massimo 4 frasi). Rispondi in italiano.`;
+            } else if (queryType === 'life') {
+                prompt = `Sei un astronauta a bordo della ISS. Raccontaci un aneddoto curioso, divertente o sbalorditivo su come si vive a bordo a gravità zero (come si mangia, come si dorme ancorati alle pareti o come ci si allena per combattere la perdita ossea). Rispondi in modo cordiale, empatico e molto conciso (massimo 4 frasi) in italiano.`;
+            }
+
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
             try {
@@ -522,7 +568,7 @@
                     if (response.status === 429 && retries > 0) { // Too Many Requests
                         console.warn(`API Gemini: Rate limit. Riprovo tra ${delay / 1000}s... Tentativi rimasti: ${retries - 1}`);
                         await new Promise(res => setTimeout(res, delay));
-                        return fetchGeminiInfo(lat, lon, retries - 1, delay * 2); // Exponential backoff
+                        return fetchGeminiInfo(lat, lon, queryType, retries - 1, delay * 2); // Exponential backoff
                     }
                     throw new Error(`Errore dall'API Gemini: status ${response.status}`);
                 }
@@ -538,11 +584,10 @@
 
             } catch (error) {
                 console.error("Errore nella chiamata a Gemini:", error);
-                domElements.geminiData.textContent = "Impossibile contattare il servizio di IA. Riprova tra poco.";
+                domElements.geminiData.textContent = "Impossibile stabilire il collegamento satellitare con l'IA. Riprova tra poco.";
             } finally {
                 domElements.geminiLoader.classList.add('hidden');
-                domElements.fetchGeminiBtn.disabled = false;
-                domElements.fetchGeminiBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.forEach(btn => btn.disabled = false);
             }
         }
 
@@ -610,6 +655,26 @@
             });
         }
         
+        // Collega i gestori di eventi della Console AI Gemini
+        function setupAiConsole() {
+            const buttons = [domElements.btnOverflying, domElements.btnCrew, domElements.btnExperiments, domElements.btnLife];
+            
+            const handleAiQuery = (selectedBtn, queryType) => {
+                if (currentIssData) {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    selectedBtn.classList.add('active');
+                    fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude, queryType);
+                } else {
+                    domElements.geminiData.textContent = "I dati di telemetria della stazione non sono ancora pronti. Attendi un istante.";
+                }
+            };
+
+            domElements.btnOverflying.addEventListener('click', () => handleAiQuery(domElements.btnOverflying, 'overflying'));
+            domElements.btnCrew.addEventListener('click', () => handleAiQuery(domElements.btnCrew, 'crew'));
+            domElements.btnExperiments.addEventListener('click', () => handleAiQuery(domElements.btnExperiments, 'experiments'));
+            domElements.btnLife.addEventListener('click', () => handleAiQuery(domElements.btnLife, 'life'));
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
@@ -619,17 +684,10 @@
             
             setupShareButtons();
             setupCameraButtons();
+            setupAiConsole();
             
             setInterval(updateIssPosition, 5000);
             setInterval(drawOrbit, 5 * 60 * 1000); // Aggiorna l'orbita ogni 5 minuti
-
-            domElements.fetchGeminiBtn.addEventListener('click', () => {
-                if (currentIssData) {
-                    fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
-                } else {
-                    domElements.geminiData.textContent = "Dati di posizione non ancora disponibili. Attendi qualche secondo e riprova.";
-                }
-            });
             
             // Event listener per il pulsante di inseguimento
             domElements.followIssBtn.addEventListener('click', () => {
