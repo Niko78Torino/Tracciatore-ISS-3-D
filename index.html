@@ -318,7 +318,7 @@
     <!-- ========================================== -->
     <!-- 6. JAVASCRIPT: THREE.JS & TELEMETRIA       -->
     <!-- ========================================== -->
-    <script>
+   <script>
         const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
         
         const domElements = {
@@ -385,25 +385,34 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
+            // ==========================================
+            // MODIFICHE NAVICELLA ISS
+            // ==========================================
             issMarker = new THREE.Group();
-            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x00e5ff, metalness: 0.8, roughness: 0.2 });
-            const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 6, 16);
+            
+            // Corpo centrale: Colore Rosso Cremisi brillante a forte contrasto
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff2a2a, metalness: 0.5, roughness: 0.3 });
+            const bodyGeometry = new THREE.CylinderGeometry(1.2, 1.2, 7, 16); // Leggermente più largo e lungo
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             body.rotation.z = Math.PI / 2;
             issMarker.add(body);
 
-            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.2, roughness: 0.7, side: THREE.DoubleSide });
-            const panelGeometry = new THREE.BoxGeometry(8, 3.8, 0.1);
+            // Pannelli solari: Colore Arancione scuro / Rame
+            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0xd95a00, metalness: 0.2, roughness: 0.8, side: THREE.DoubleSide });
+            const panelGeometry = new THREE.BoxGeometry(10, 5, 0.3); // Pannelli più estesi e leggermente più spessi
+            
             const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
-            panel1.position.x = 6;
+            panel1.position.x = 7.5;
             issMarker.add(panel1);
             
             const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
-            panel2.position.x = -6;
+            panel2.position.x = -7.5;
             issMarker.add(panel2);
 
-            issMarker.scale.set(0.4, 0.4, 0.4);
+            // SCALA GLOBALE NAVICELLA: Notevolmente ingrandita (da 0.4 a 0.85)
+            issMarker.scale.set(0.85, 0.85, 0.85);
             scene.add(issMarker);
+            // ==========================================
 
             const starVertices = [];
             for (let i = 0; i < 15000; i++) {
@@ -523,5 +532,3 @@
             });
         });
     </script>
-</body>
-</html>
