@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracciatore ISS 3D Avanzato con Orbita</title>
+    <title>Tracciatore ISS 3D con Dati da Gemini</title>
     
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-8268426852108056">
@@ -13,6 +13,10 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- three.js e OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +25,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
         }
         #globeContainer {
             width: 100%;
@@ -42,6 +45,7 @@
         .loader {
             animation: spin 1s linear infinite;
         }
+        /* Stile per il contenitore del video per mantenere l'aspect ratio */
         .aspect-video {
             position: relative;
             width: 100%;
@@ -54,37 +58,16 @@
             width: 100%;
             height: 100%;
         }
-        .control-btn.active {
-            background-color: #06b6d4; /* cyan-500 */
-            color: white;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
-        }
-        /* Stili per evidenziare la query AI attiva */
-        .ai-tab-btn.active {
-            background-color: #06b6d4;
-            color: white;
-            border-color: #06b6d4;
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
 
-    <!-- Sezione Intestazione con Titolo e Descrizione -->
-    <div class="max-w-4xl mx-auto text-center py-8 px-4">
-        <h1 class="text-3xl md:text-4xl font-bold text-cyan-400">Tracciatore ISS 3D: La Tua Finestra sullo Spazio</h1>
-        <p class="text-gray-300 mt-4">
-            Benvenuto nel nostro avanzato Tracciatore ISS 3D. Questa applicazione ti offre un'esperienza immersiva unica, permettendoti di seguire in tempo reale il viaggio della Stazione Spaziale Internazionale attorno alla Terra. Grazie a una visualizzazione 3D interattiva e a dati costantemente aggiornati, potrai esplorare la sua orbita, scoprire la sua posizione esatta e vedere il mondo dalla prospettiva di un astronauta. È uno strumento perfetto per studenti, educatori e tutti gli appassionati di spazio che desiderano connettersi con l'esplorazione spaziale in modo directo e coinvolgente.
-        </p>
-    </div>
-
-    <!-- Sezione Principale con il Globo e Controlli -->
-    <header class="w-full h-[70vh] md:h-[80vh] bg-gray-800 relative shadow-2xl rounded-xl mx-auto max-w-7xl">
-        <div id="globeContainer" class="rounded-xl overflow-hidden"></div>
-        <!-- Controlli sovrapposti al globo -->
-        <div class="absolute top-4 right-4 z-10">
-            <button id="follow-iss-btn" class="control-btn active bg-gray-700/80 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                Insegui ISS
-            </button>
+    <!-- Sezione Principale con il Globo -->
+    <header class="w-full h-[60vh] md:h-[70vh] bg-gray-800 relative shadow-2xl">
+        <div id="globeContainer"></div>
+        <div class="absolute top-4 left-4 bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl">
+             <h1 class="text-2xl md:text-3xl font-bold text-cyan-400">Tracciatore ISS 3D</h1>
+             <p class="text-gray-300">Segui la Stazione Spaziale in tempo reale.</p>
         </div>
     </header>
 
@@ -92,7 +75,7 @@
     <main class="max-w-7xl mx-auto p-4 md:p-8">
         
         <!-- Griglia dei Contenuti Principali -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Colonna Sinistra: Dati e Curiosità -->
             <div class="lg:col-span-2 space-y-6">
@@ -119,85 +102,40 @@
                     </div>
                 </div>
 
-                <!-- Dati da Gemini (Evoluta in Console Multitasking) -->
+                <!-- Dati da Gemini -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg flex flex-col justify-between">
                     <div>
-                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Console di Bordo & IA Gemini</h2>
-                        <p class="text-xs text-gray-400 mb-4">Interroga l'intelligenza artificiale per ricevere dettagli scientifici, geografici e operativi in tempo reale.</p>
-                        
-                        <!-- Schermo di Output -->
-                        <div id="gemini-container" class="flex-grow relative min-h-[140px] bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 shadow-inner">
-                            <div id="gemini-loader" class="absolute inset-0 bg-gray-800/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-md hidden">
-                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10 mb-2" style="border-top-color: #22D3EE;"></div>
-                                <span class="text-xs text-cyan-400 font-medium">Collegamento satellitare con Gemini...</span>
+                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Curiosità su richiesta</h2>
+                        <div id="gemini-container" class="flex-grow relative min-h-[120px] bg-gray-700/40 p-4 rounded-lg">
+                            <div id="gemini-loader" class="absolute inset-0 bg-gray-700/30 backdrop-blur-sm flex items-center justify-center rounded-md hidden">
+                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12" style="border-top-color: #22D3EE;"></div>
                             </div>
-                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2 text-sm leading-relaxed">
-                                Seleziona uno dei canali di comunicazione qui sotto per iniziare la trasmissione dei dati.
+                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2">
+                                Clicca il pulsante per scoprire cosa sta sorvolando la ISS in questo momento.
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Griglia dei Pulsanti Interattivi -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-                        <button id="btn-overflying" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
-                            <span class="text-base">🌍</span>
-                            <span>Cosa sorvola?</span>
-                        </button>
-                        <button id="btn-crew" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
-                            <span class="text-base">🧑‍🚀</span>
-                            <span>Equipaggio</span>
-                        </button>
-                        <button id="btn-experiments" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
-                            <span class="text-base">🔬</span>
-                            <span>Esperimenti</span>
-                        </button>
-                        <button id="btn-life" class="ai-tab-btn py-2.5 px-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 flex flex-col items-center gap-1">
-                            <span class="text-base">🛰️</span>
-                            <span>Vita a bordo</span>
-                        </button>
-                    </div>
+                    <button id="fetch-gemini-btn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 shadow-md">
+                        Scopri cosa sorvola la ISS
+                    </button>
                 </div>
             </div>
 
-            <!-- Colonna Destra: Live Feed, Condivisione e Donazione -->
+            <!-- Colonna Destra: Live Feed e Donazione -->
             <div class="space-y-6">
                 <!-- Live Camera Feed -->
                 <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
                     <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
                     <div class="aspect-video bg-black rounded-md overflow-hidden">
-                        <iframe id="iss-live-feed" src="https://www.youtube.com/embed/live_stream?channel=UCq0818vTshXbT57bcaPrXgQ&autoplay=1&mute=1&controls=1" 
+                        <!-- LINK AGGIORNATO AL FLUSSO DINAMICO DELLA NASA -->
+                        <iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1&mute=1&controls=0"
                                 title="Live dalla Stazione Spaziale Internazionale"
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen>
                         </iframe>
                     </div>
-                    <div id="camera-buttons" class="flex flex-wrap justify-center gap-2 mt-4">
-                        <button class="control-btn camera-btn active text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UCq0818vTshXbT57bcaPrXgQ&autoplay=1&mute=1&controls=1">Live Esterno</button>
-                        <button class="control-btn camera-btn text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UC5m9v395066SOnL6sc3V4fg&autoplay=1&mute=1&controls=1">Live Interno/Misto</button>
-                        <button class="control-btn camera-btn text-xs py-1.5 px-3 bg-gray-700 hover:bg-cyan-600 rounded-full transition-colors" data-src="https://www.youtube.com/embed/live_stream?channel=UCO5S7_F46vSgWvD6v2K7n8w&autoplay=1&mute=1&controls=1">NASA TV</button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2 text-center">Seleziona una telecamera. Il feed potrebbe essere nero durante il passaggio nell'ombra terrestre.</p>
-                </div>
-
-                <!-- Condividi sui Social -->
-                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Condividi</h2>
-                    <div class="flex justify-around items-center">
-                        <a id="share-facebook" href="#" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su Facebook">
-                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg>
-                        </a>
-                        <a id="share-twitter" href="#" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su X">
-                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        </a>
-                        <a id="share-whatsapp" href="#" target="_blank" data-action="share/whatsapp/share" class="text-gray-400 hover:text-white transition-colors" aria-label="Condividi su WhatsApp">
-                           <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 12c0 1.74.44 3.37 1.21 4.82l-1.33 4.85l4.95-1.3c1.4.73 2.99 1.15 4.68 1.15h.01c5.46 0 9.91-4.45 9.91-9.91c0-5.46-4.45-9.91-9.91-9.91zM17.52 15.3c-.28-.14-1.66-.82-1.92-.91c-.26-.1-.45-.14-.64.14c-.19.28-.73.91-.89 1.1c-.17.19-.33.21-.61.07c-.28-.14-1.18-.43-2.25-1.39c-.83-.72-1.39-1.62-1.55-1.89c-.17-.28-.02-.43.12-.57c.13-.13.28-.33.42-.49c.14-.17.19-.28.28-.47c.1-.19.05-.36-.02-.5c-.07-.14-.64-1.55-.87-2.12c-.23-.58-.47-.5-.64-.51h-.52c-.19 0-.49.07-.74.35c-.25.28-.97.95-.97 2.32c0 1.37.99 2.69 1.13 2.87c.14.19 1.97 3.14 4.77 4.2c.68.26 1.22.41 1.64.53c.6.17 1.15.14 1.58.09c.48-.07 1.66-.68 1.89-1.33c.23-.65.23-1.21.16-1.33c-.07-.12-.26-.19-.54-.33z"/></svg>
-                        </a>
-                        <button id="copy-link" class="text-gray-400 hover:text-white transition-colors" aria-label="Copia link">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                        </button>
-                    </div>
-                    <p id="copy-feedback" class="text-xs text-emerald-400 mt-3 text-center h-4"></p>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Live feed by NASA. Potrebbe essere nero durante il lato notturno o per perdita di segnale.</p>
                 </div>
 
                  <!-- Dona una Mancia -->
@@ -208,25 +146,12 @@
                     </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Sezione Descrizione -->
-        <div class="my-8 bg-gray-800/50 p-6 rounded-xl shadow-lg text-gray-300">
-            <h2 class="text-2xl font-bold text-cyan-300 mb-4">Esplora la Terra dallo Spazio: Il Tuo Tracciatore ISS 3D</h2>
-            <div class="space-y-4 text-gray-400">
-                <p>
-                    Parti per un viaggio unico seguendo la Stazione Spaziale Internazionale (ISS) in tempo reale con il nostro tracciatore 3D interattivo. Questo strumento non è solo una mappa, ma una vera e propria finestra sullo spazio. Osserva la Terra dalla prospettiva degli astronauti mentre la ISS orbita attorno al nostro pianeta a oltre <strong>28.000 km/h</strong>, completando un'orbita ogni 90 minuti.
-                </p>
-                <p>
-                    <strong>Cosa puoi fare?</strong>
-                    Usa il nostro strumento per un'esperienza completa: guarda il modello della ISS muoversi su un globo realistico, visualizza dati in tempo reale come altitudine e velocità, e con un solo clic, supera l'intelligenza artificiale di <strong>Gemini</strong> per scoprire dettagli affascinanti sul luogo che la stazione sta sorvolando. Che sia una metropoli, un deserto o l'oceano, riceverai curiosità e contesto geografico all'istante. Inoltre, puoi sintonizzarti sul <strong>feed video in diretta</strong> dalle telecamere della ISS. Questo strumento è perfetto per appassionati di spazio, studenti e chiunque sia curioso del nostro mondo.
-                </p>
-            </div>
         </div>
 
         <!-- Spazio per Banner Pubblicitario -->
-        <div class="my-8 h-48 bg-gray-800/50 rounded-xl shadow-lg flex items-center justify-center">
-            <span class="text-gray-500">Spazio Pubblicitario</span>
+        <div class="my-8 h-48 bg-gray-800/50 rounded-xl shadow-lg">
+            <!-- Il codice AdSense andrà qui -->
         </div>
 
         <!-- Disclaimer e Privacy -->
@@ -235,33 +160,22 @@
             <p>Questa applicazione è fornita solo a scopo educativo e di intrattenimento. I dati sulla posizione sono forniti da un'API di terze parti e non ne è garantita l'accuratezza assoluta. Le informazioni generate da Gemini sono prodotte da un'intelligenza artificiale e potrebbero contenere imprecisioni.</p>
             <p class="font-semibold">Questa applicazione rispetta la tua privacy: non vengono raccolti, tracciati o memorizzati dati personali degli utenti.</p>
         </div>
+
     </main>
 
-    <!-- Footer -->
+     <!-- Footer -->
     <footer class="text-center text-xs text-cyan-400 py-8 space-y-1">
         <p>Copyright &copy; 2025 Nicola Nicolaci. Tutti i diritti riservati.</p>
-        <p>Per contatti: <a href="mailto:vcard@luminaessenza.com" class="underline hover:text-cyan-300">vcard@luminaessenza.com</a></p>
         <p>
             Posizione ISS da <a href="https://wheretheiss.at/" target="_blank" class="underline hover:text-cyan-300">wheretheiss.at</a>
         </p>
         <p>Sviluppato con Gemini & three.js</p>
     </footer>
 
-    <!-- three.js e OrbitControls -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
-                "OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js"
-            }
-        }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'OrbitControls';
-
-        // --- IMPOSTAZIONI ---
+    <script>
+        // --- SETUP ---
+        const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
+        
         const domElements = {
             lat: document.getElementById('lat'),
             lon: document.getElementById('lon'),
@@ -270,49 +184,19 @@
             geminiData: document.getElementById('gemini-data'),
             geminiLoader: document.getElementById('gemini-loader'),
             globeContainer: document.getElementById('globeContainer'),
-            followIssBtn: document.getElementById('follow-iss-btn'),
-            // Nuovi bottoni per i canali della console AI
-            btnOverflying: document.getElementById('btn-overflying'),
-            btnCrew: document.getElementById('btn-crew'),
-            btnExperiments: document.getElementById('btn-experiments'),
-            btnLife: document.getElementById('btn-life')
+            fetchGeminiBtn: document.getElementById('fetch-gemini-btn')
         };
         
         let currentIssData = null;
-        let followIss = true; // Stato per l'inseguimento della camera
 
-        // --- IMPOSTAZIONI THREE.JS ---
-        let scene, camera, renderer, controls, earth, issMarker, stars, clouds, orbitLine;
+        // --- THREE.JS SETUP ---
+        let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
         const EARTH_RADIUS = 100;
-
-        // Funzione helper robusta per recuperare dati dall'API della ISS.
-        // Interroga prima l'API ufficiale diretta (con supporto CORS nativo).
-        // Se fallisce, utilizza la connessione proxy come fallback, eseguendo l'URL encoding dei parametri.
-        async function fetchIss(queryParams = '') {
-            const directUrl = `https://api.wheretheiss.at/v1/satellites/25544${queryParams}`;
-            try {
-                const response = await fetch(directUrl);
-                if (response.ok) {
-                    return await response.json();
-                }
-            } catch (err) {
-                console.warn("Chiamata diretta all'API ISS fallita, provo con il proxy...", err);
-            }
-
-            // Fallback sul proxy con codifica URI corretta dei parametri per impedire risposte anomale dal proxy
-            const targetUrl = `https://api.wheretheiss.at/v1/satellites/25544${queryParams}`;
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                throw new Error('La risposta della rete non era ok');
-            }
-            return await response.json();
-        }
 
         function initGlobe() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight, 0.1, 3000);
-            camera.position.z = 180;
+            camera.position.z = 250;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
@@ -324,74 +208,60 @@
             directionalLight.position.set(-100, 30, 50);
             scene.add(directionalLight);
 
-            controls = new OrbitControls(camera, renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 110;
+            controls.minDistance = 120;
             controls.maxDistance = 500;
             controls.autoRotate = false;
-            
-            // Disabilita l'inseguimento se l'utente interagisce
-            controls.addEventListener('start', () => {
-                followIss = false;
-                domElements.followIssBtn.classList.remove('active');
-            });
 
             const loader = new THREE.TextureLoader();
 
-            // Mantenuta la terra originale come richiesto
             const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
             const earthMaterial = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
-                map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-day.jpg', undefined, undefined, () => { console.error('Errore nel caricamento della texture della Terra'); }),
-                bumpMap: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-topology.png'),
+                map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-day.jpg'),
+                bumpMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-topology.png'),
                 bumpScale: 0.05,
-                specularMap: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-water.png'),
+                specularMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-water.png'),
                 specular: new THREE.Color('grey'),
-                emissiveMap: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-night.jpg'),
+                emissiveMap: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-night.jpg'),
                 emissive: new THREE.Color(0xffffff),
-                emissiveIntensity: 2.5
+                emissiveIntensity: 1.6
             });
             earth = new THREE.Mesh(earthGeometry, earthMaterial);
             scene.add(earth);
 
-            // --- Creazione Atmosfera ---
-            const atmosphereGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 4, 64, 64);
-            const atmosphereMaterial = new THREE.ShaderMaterial({
-                vertexShader: `
-                    varying vec3 vertexNormal;
-                    void main() {
-                        vertexNormal = normalize(normalMatrix * normal);
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    varying vec3 vertexNormal;
-                    void main() {
-                        float intensity = pow(0.6 - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);
-                        gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
-                    }
-                `,
-                blending: THREE.AdditiveBlending,
-                side: THREE.BackSide
-            });
-            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-            scene.add(atmosphere);
-
-            // Mantenute le nuvole originali
             const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.5, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
-                map: loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.27.2/example/img/earth-clouds.png'),
+                map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-clouds.png'),
                 transparent: true,
                 opacity: 0.4
             });
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
-            // Modello ISS dettagliato
-            issMarker = createDetailedIssModel();
-            scene.add(issMarker);
+            issMarker = new THREE.Group();
             
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcb4335, metalness: 0.7, roughness: 0.3 });
+            const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 6, 16);
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.rotation.z = Math.PI / 2;
+            issMarker.add(body);
+
+            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x943126, metalness: 0.1, roughness: 0.8, side: THREE.DoubleSide });
+            const panelGeometry = new THREE.BoxGeometry(8, 4, 0.1);
+            const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel1.position.x = 6;
+            issMarker.add(panel1);
+            
+            const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel2.position.x = -6;
+            issMarker.add(panel2);
+
+            issMarker.scale.set(0.35, 0.35, 0.35);
+            scene.add(issMarker);
+
             const starVertices = [];
             for (let i = 0; i < 20000; i++) {
                 const x = THREE.MathUtils.randFloatSpread(4000);
@@ -408,65 +278,19 @@
             animate();
             window.addEventListener('resize', onWindowResize);
         }
-        
-        // Funzione per creare un modello ISS dettagliato
-        function createDetailedIssModel() {
-            const issGroup = new THREE.Group();
-            
-            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.4 });
-            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x283747, metalness: 0.9, roughness: 0.2, side: THREE.DoubleSide });
-            const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.3 });
-
-            // Truss (struttura centrale)
-            const trussGeometry = new THREE.BoxGeometry(12, 0.5, 0.5);
-            const truss = new THREE.Mesh(trussGeometry, bodyMaterial);
-            issGroup.add(truss);
-
-            // Moduli abitativi
-            const moduleGeometry = new THREE.CylinderGeometry(0.8, 0.8, 2, 16);
-            const mainModule = new THREE.Mesh(moduleGeometry, bodyMaterial);
-            mainModule.rotation.x = Math.PI / 2;
-            issGroup.add(mainModule);
-            
-            const sideModule1 = new THREE.Mesh(moduleGeometry, goldMaterial);
-            sideModule1.scale.set(0.6, 0.6, 0.6);
-            sideModule1.position.z = 1.5;
-            issGroup.add(sideModule1);
-
-            // Pannelli solari
-            const panelGeometry = new THREE.BoxGeometry(8, 3, 0.1);
-            for(let i = 0; i < 2; i++) {
-                const sign = i === 0 ? 1 : -1;
-                const panelArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3, 8), bodyMaterial);
-                panelArm.position.x = sign * 4;
-                panelArm.rotation.z = Math.PI / 2;
-                issGroup.add(panelArm);
-                
-                const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
-                panel1.position.x = sign * 8;
-                issGroup.add(panel1);
-            }
-            
-            issGroup.scale.set(0.35, 0.35, 0.35);
-            return issGroup;
-        }
 
         function animate() {
             requestAnimationFrame(animate);
             earth.rotation.y += 0.00005;
             clouds.rotation.y += 0.00006;
             stars.rotation.y += 0.00002;
-            
-            if (followIss && issMarker && issMarker.position.length() > 1) {
-                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(180);
-                camera.position.lerp(desiredPosition, 0.02);
+
+            if (issMarker && issMarker.position.length() > 1) {
+                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(250);
+                camera.position.lerp(desiredPosition, 0.03);
                 controls.target.set(0, 0, 0);
+                issMarker.lookAt(earth.position);
             }
-                
-            if (issMarker) {
-                 issMarker.lookAt(earth.position);
-            }
-            
             controls.update();
             renderer.render(scene, camera);
         }
@@ -476,7 +300,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
         }
-        
+
         function latLonToVector3(lat, lon, radius) {
             const phi = (90 - lat) * (Math.PI / 180);
             const theta = (lon + 180) * (Math.PI / 180);
@@ -486,124 +310,60 @@
             return new THREE.Vector3(x, y, z);
         }
 
-        // Funzione per disegnare l'orbita corretta (limite di 10 punti temporali per wheretheiss API)
-        async function drawOrbit() {
-            try {
-                // Rimuovi la vecchia orbita se esiste
-                if (orbitLine) {
-                    scene.remove(orbitLine);
-                    orbitLine.geometry.dispose();
-                    orbitLine.material.dispose();
-                }
-
-                // Ottieni i dati orbitali per i prossimi 90 minuti (10 punti temporali totali per non sforare i limiti API)
-                const timestamps = [];
-                const now = Math.floor(Date.now() / 1000);
-                for (let i = 0; i < 10; i++) {
-                    timestamps.push(now + i * 9 * 60); // 10 punti distanziati di 9 minuti l'uno dall'altro = 90 minuti complessivi
-                }
-                
-                // Utilizza il sistema di fetch unificato per l'API dell'orbita
-                const orbitData = await fetchIss(`?timestamps=${timestamps.join(',')}`);
-
-                // Controllo difensivo per verificare che orbitData sia effettivamente un array
-                if (!Array.isArray(orbitData)) {
-                    throw new Error("I dati orbitali ricevuti non sono in un formato Array valido.");
-                }
-
-                const points = [];
-                const avgAltitude = orbitData.reduce((acc, p) => acc + p.altitude, 0) / orbitData.length;
-                const orbitRadius = EARTH_RADIUS + (avgAltitude / 100);
-
-                orbitData.forEach(pos => {
-                    points.push(latLonToVector3(pos.latitude, pos.longitude, orbitRadius));
-                });
-                // Aggiungi il primo punto alla fine per chiudere il loop
-                if(points.length > 0) points.push(points[0].clone());
-
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const material = new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.7 });
-                orbitLine = new THREE.Line(geometry, material);
-                scene.add(orbitLine);
-
-            } catch (error) {
-                console.error("Impossibile disegnare l'orbita:", error);
-            }
-        }
-
-        // Funzione modificata per supportare più prompt in base alla selezione dell'utente
-        // Mantiene la struttura di chiamata API originale per funzionare perfettamente su Netlify
-        async function fetchGeminiInfo(lat, lon, queryType = 'overflying', retries = 3, delay = 1000) {
+        async function fetchGeminiInfo(lat, lon) {
+            console.log("Requesting info from Netlify function for:", lat, lon);
             domElements.geminiLoader.classList.remove('hidden');
+            domElements.fetchGeminiBtn.disabled = true;
+            domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
             
-            // Disabilita temporaneamente tutti i pulsanti della console
-            const buttons = [domElements.btnOverflying, domElements.btnCrew, domElements.btnExperiments, domElements.btnLife];
-            buttons.forEach(btn => btn.disabled = true);
-
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            
-            // Genera il prompt ad-hoc in base all'interazione cliccata
-            let prompt = "";
-            if (queryType === 'overflying') {
-                prompt = `Sei un assistente esperto di geografia. La Stazione Spaziale Internazionale si trova attualmente sopra le coordinate geografiche: Latitudine ${lat.toFixed(4)}, Longitudine ${lon.toFixed(4)}. Descrivi in modo interessante e conciso (massimo 3-4 frasi) cosa sta sorvolando in questo momento. Potrebbe essere un oceano, una città, una catena montuosa o un deserto. Fornisci qualche curiosità sul luogo, se pertinente. Rispondi in italiano.`;
-            } else if (queryType === 'crew') {
-                prompt = `Sei l'Ufficiale alle Comunicazioni della ISS. Dimmi chi sono i membri principali dell'equipaggio della spedizione attualmente a bordo della Stazione Spaziale Internazionale (spedizione corrente nel 2026). Elenca brevemente i nomi di spicco, i ruoli e la loro nazionalità in modo chiaro, avvincente e conciso (massimo 4 frasi). Rispondi in italiano.`;
-            } else if (queryType === 'experiments') {
-                prompt = `Sei il Direttore Scientifico di bordo della ISS. Descrivi 2 o 3 esperimenti scientifici straordinari condotti attualmente in microgravità (ad esempio biologia spaziale, medicina o scienze dei materiali) spiegando come aiuteranno la vita sulla Terra o le future missioni su Marte. Sii conciso e affascinante (massimo 4 frasi). Rispondi in italiano.`;
-            } else if (queryType === 'life') {
-                prompt = `Sei un astronauta a bordo della ISS. Raccontaci un aneddoto curioso, divertente o sbalorditivo su come si vive a bordo a gravità zero (come si mangia, come si dorme ancorati alle pareti o come ci si allena per combattere la perdita ossea). Rispondi in modo cordiale, empatico e molto conciso (massimo 4 frasi) in italiano.`;
-            }
-
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            const functionUrl = '/.netlify/functions/fetch-gemini-info';
 
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ lat, lon })
                 });
 
                 if (!response.ok) {
-                    if (response.status === 429 && retries > 0) { // Too Many Requests
-                        console.warn(`API Gemini: Rate limit. Riprovo tra ${delay / 1000}s... Tentativi rimasti: ${retries - 1}`);
-                        await new Promise(res => setTimeout(res, delay));
-                        return fetchGeminiInfo(lat, lon, queryType, retries - 1, delay * 2); // Exponential backoff
-                    }
-                    throw new Error(`Errore dall'API Gemini: status ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates[0]?.content?.parts?.[0]) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    domElements.geminiData.innerHTML = text.replace(/\n/g, '<br>');
-                } else {
-                    throw new Error("Risposta non valida o vuota dall'API Gemini.");
+                    throw new Error(`Errore dalla funzione serverless: status ${response.status}`);
                 }
 
+                const result = await response.json();
+
+                if (result.text) {
+                    domElements.geminiData.innerHTML = result.text.replace(/\n/g, '<br>');
+                } else {
+                    throw new Error("Risposta non valida dalla funzione serverless.");
+                }
             } catch (error) {
-                console.error("Errore nella chiamata a Gemini:", error);
-                domElements.geminiData.textContent = "Impossibile stabilire il collegamento satellitare con l'IA. Riprova tra poco.";
+                console.error("Errore nel chiamare la funzione Netlify:", error);
+                domElements.geminiData.textContent = "Impossibile contattare il server. Riprova tra poco.";
             } finally {
                 domElements.geminiLoader.classList.add('hidden');
-                buttons.forEach(btn => btn.disabled = false);
+                domElements.fetchGeminiBtn.disabled = false;
+                domElements.fetchGeminiBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
         async function updateIssPosition() {
             try {
-                // Utilizza il sistema di fetch unificato ed auto-resiliente
-                const data = await fetchIss();
+                const response = await fetch(issApiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                
                 currentIssData = data;
+                
                 const { latitude, longitude, altitude, velocity } = data;
+                
                 domElements.lat.textContent = latitude.toFixed(4);
                 domElements.lon.textContent = longitude.toFixed(4);
                 domElements.alt.textContent = `${altitude.toFixed(2)} km`;
                 domElements.vel.textContent = `${velocity.toFixed(2)} km/h`;
-                
-                const issRadius = EARTH_RADIUS + (altitude / 100); 
+
+                const issRadius = EARTH_RADIUS + (altitude / 100);
                 issMarker.position.copy(latLonToVector3(latitude, longitude, issRadius));
+
             } catch (error) {
                 console.error('Errore nel recuperare i dati della ISS:', error);
                 domElements.lat.textContent = "Errore";
@@ -612,89 +372,16 @@
             }
         }
 
-        function setupShareButtons() {
-            const pageUrl = window.location.href;
-            const shareText = encodeURIComponent("Segui la Stazione Spaziale in tempo reale con questo fantastico tracciatore 3D! 🛰️🌍");
-            const copyFeedbackEl = document.getElementById('copy-feedback');
-
-            document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
-            document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${shareText}`;
-            document.getElementById('share-whatsapp').href = `whatsapp://send?text=${shareText}%20${encodeURIComponent(pageUrl)}`;
-
-            document.getElementById('copy-link').addEventListener('click', () => {
-                const textArea = document.createElement('textarea');
-                textArea.value = pageUrl;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    copyFeedbackEl.textContent = 'Link copiato!';
-                } catch (err) {
-                    console.error('Impossibile copiare il link', err);
-                    copyFeedbackEl.textContent = 'Errore nella copia.';
-                }
-                document.body.removeChild(textArea);
-
-                setTimeout(() => { copyFeedbackEl.textContent = ''; }, 2000);
-            });
-        }
-
-        function setupCameraButtons() {
-            const feedFrame = document.getElementById('iss-live-feed');
-            const buttons = document.querySelectorAll('.camera-btn');
-            
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const newSrc = button.dataset.src;
-                    if (feedFrame.src !== newSrc) {
-                        feedFrame.src = newSrc;
-                    }
-                    buttons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                });
-            });
-        }
-        
-        // Collega i gestori di eventi della Console AI Gemini
-        function setupAiConsole() {
-            const buttons = [domElements.btnOverflying, domElements.btnCrew, domElements.btnExperiments, domElements.btnLife];
-            
-            const handleAiQuery = (selectedBtn, queryType) => {
-                if (currentIssData) {
-                    buttons.forEach(btn => btn.classList.remove('active'));
-                    selectedBtn.classList.add('active');
-                    fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude, queryType);
-                } else {
-                    domElements.geminiData.textContent = "I dati di telemetria della stazione non sono ancora pronti. Attendi un istante.";
-                }
-            };
-
-            domElements.btnOverflying.addEventListener('click', () => handleAiQuery(domElements.btnOverflying, 'overflying'));
-            domElements.btnCrew.addEventListener('click', () => handleAiQuery(domElements.btnCrew, 'crew'));
-            domElements.btnExperiments.addEventListener('click', () => handleAiQuery(domElements.btnExperiments, 'experiments'));
-            domElements.btnLife.addEventListener('click', () => handleAiQuery(domElements.btnLife, 'life'));
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
-            
-            // Disegna l'orbita iniziale
-            setTimeout(drawOrbit, 1000);
-            
-            setupShareButtons();
-            setupCameraButtons();
-            setupAiConsole();
-            
             setInterval(updateIssPosition, 5000);
-            setInterval(drawOrbit, 5 * 60 * 1000); // Aggiorna l'orbita ogni 5 minuti
-            
-            // Event listener per il pulsante di inseguimento
-            domElements.followIssBtn.addEventListener('click', () => {
-                followIss = !followIss;
-                domElements.followIssBtn.classList.toggle('active', followIss);
-                if (followIss) {
-                    controls.autoRotate = false; // Ferma la rotazione automatica se attiva
+
+            domElements.fetchGeminiBtn.addEventListener('click', () => {
+                if (currentIssData) {
+                    fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
+                } else {
+                    domElements.geminiData.textContent = "Dati di posizione non ancora disponibili. Attendi qualche secondo e riprova.";
                 }
             });
         });
