@@ -20,7 +20,7 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -45,7 +45,6 @@
         .loader {
             animation: spin 1s linear infinite;
         }
-        /* Stile per il contenitore del video per mantenere l'aspect ratio */
         .aspect-video {
             position: relative;
             width: 100%;
@@ -58,233 +57,268 @@
             width: 100%;
             height: 100%;
         }
-        /* Custom scrollbar per il div dei video se si volesse limitare l'altezza in futuro */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #374151; 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4B5563; 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #6B7280; 
-        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-gray-950 text-white min-h-screen flex flex-col justify-between">
 
-  <!-- 1. Intestazione Dedicata e Descrizione del Software -->
-    <header class="w-full bg-gray-800 border-b border-gray-700 py-5 px-4 md:px-8 shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-cyan-400 tracking-wide flex items-center gap-2">
-                    🛰️ Tracciatore ISS 3D
-                </h1>
-                <p class="text-gray-300 text-sm md:text-base mt-1">
-                    Traccia la Stazione Spaziale Internazionale in orbita terrestre e visualizza dati e immagini in tempo reale.
+    <!-- ========================================== -->
+    <!-- 1. INTESTAZIONE E DESCRIZIONE INIZIALE     -->
+    <!-- ========================================== -->
+    <header class="w-full bg-gray-900 border-b border-gray-800 shadow-xl py-6 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-3xl">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🛰️</span>
+                    <h1 class="text-2xl md:text-4xl font-extrabold text-cyan-400 tracking-tight">
+                        Tracciatore ISS 3D
+                    </h1>
+                </div>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                    Esplora la posizione in tempo reale della <strong>Stazione Spaziale Internazionale (ISS)</strong> in orbita terrestre bassa. 
+                    Osserva la sua traiettoria su un globo tridimensionale interattivo, monitora i parametri orbitali di velocità e quota, 
+                    scopri il territorio sottostante grazie all'intelligenza artificiale di <strong>Gemini</strong> e guarda le immagini in diretta dallo spazio.
                 </p>
             </div>
-            <div class="inline-flex items-center gap-2 self-start md:self-auto bg-gray-900/80 border border-cyan-500/30 px-3 py-1.5 rounded-full text-xs text-cyan-300">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Tracciamento Attivo</span>
+            
+            <!-- Badge Telemetria Attiva -->
+            <div class="flex flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 flex-shrink-0">
+                <div class="inline-flex items-center gap-2 bg-gray-800/90 border border-cyan-500/30 px-3.5 py-1.5 rounded-full text-xs text-cyan-300 shadow-sm">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-semibold">Telemetria Live Connessa</span>
+                </div>
+                <span class="text-xs text-gray-500 font-mono">Quota media: ~408 km</span>
             </div>
         </div>
     </header>
 
-    <!-- 2. Visualizzatore Globo 3D (Altezza bilanciata) -->
-    <section class="w-full h-[380px] md:h-[420px] bg-gray-950 relative overflow-hidden border-b border-gray-800 shadow-inner">
+    <!-- ========================================== -->
+    <!-- 2. GLOBO 3D THREE.JS                       -->
+    <!-- ========================================== -->
+    <section class="w-full h-[400px] md:h-[480px] bg-gray-900 relative overflow-hidden border-b border-gray-800 shadow-inner">
         <div id="globeContainer" class="w-full h-full"></div>
+        <div class="absolute bottom-3 left-4 pointer-events-none bg-gray-950/60 backdrop-blur-sm px-3 py-1 rounded text-[11px] text-gray-400 border border-gray-800">
+            Trascina per ruotare la visuale • Rotellina per zoomare
+        </div>
     </section>
 
-    <!-- Contenuto della Pagina -->
-    <main class="max-w-7xl mx-auto p-4 md:p-8">
+    <!-- ========================================== -->
+    <!-- 3. CONTENUTO PRINCIPALE                    -->
+    <!-- ========================================== -->
+    <main class="max-w-7xl mx-auto p-4 md:p-8 flex-grow w-full space-y-8">
         
-        <!-- Griglia dei Contenuti Principali -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Colonna Sinistra: Dati e Curiosità -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Dati di Posizione -->
-                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Posizione Attuale</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div class="bg-gray-700/40 p-3 rounded-lg">
-                            <p class="text-gray-400">Latitudine:</p>
-                            <p id="lat" class="font-mono text-lg md:text-xl">--.--</p>
+            <!-- COLONNA SINISTRA (2/3): Dati, Gemini e Curiosità -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Dati Telemetrici -->
+                <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h2 class="font-bold text-xl mb-4 text-cyan-300 flex items-center gap-2">
+                        <span>📡</span> Parametri Orbitali in Tempo Reale
+                    </h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
+                            <p class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Latitudine</p>
+                            <p id="lat" class="font-mono text-xl md:text-2xl text-cyan-400 font-bold mt-1">--.--</p>
                         </div>
-                        <div class="bg-gray-700/40 p-3 rounded-lg">
-                            <p class="text-gray-400">Longitudine:</p>
-                            <p id="lon" class="font-mono text-lg md:text-xl">--.--</p>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
+                            <p class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Longitudine</p>
+                            <p id="lon" class="font-mono text-xl md:text-2xl text-cyan-400 font-bold mt-1">--.--</p>
                         </div>
-                        <div class="bg-gray-700/40 p-3 rounded-lg">
-                            <p class="text-gray-400">Altitudine:</p>
-                            <p id="alt" class="font-mono text-lg md:text-xl">---- km</p>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
+                            <p class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Altitudine</p>
+                            <p id="alt" class="font-mono text-xl md:text-2xl text-emerald-400 font-bold mt-1">---- km</p>
                         </div>
-                        <div class="bg-gray-700/40 p-3 rounded-lg">
-                            <p class="text-gray-400">Velocità:</p>
-                            <p id="vel" class="font-mono text-lg md:text-xl">---- km/h</p>
+                        <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
+                            <p class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Velocità</p>
+                            <p id="vel" class="font-mono text-xl md:text-2xl text-emerald-400 font-bold mt-1">---- km/h</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dati da Gemini -->
-                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <!-- Modulo Curiosità Geografica con Gemini -->
+                <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
                     <div>
-                        <h2 class="font-semibold text-xl mb-2 text-cyan-300">Curiosità su richiesta</h2>
-                        <div id="gemini-container" class="flex-grow relative min-h-[120px] bg-gray-700/40 p-4 rounded-lg">
-                            <div id="gemini-loader" class="absolute inset-0 bg-gray-700/30 backdrop-blur-sm flex items-center justify-center rounded-md hidden">
-                                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12" style="border-top-color: #22D3EE;"></div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-bold text-xl text-cyan-300 flex items-center gap-2">
+                                <span>🧠</span> Analisi del Territorio con Gemini
+                            </h2>
+                            <span class="text-xs text-cyan-400/80 font-mono">AI Geografica</span>
+                        </div>
+                        <div id="gemini-container" class="relative min-h-[120px] bg-gray-800/50 border border-gray-700/60 p-5 rounded-xl text-gray-300 leading-relaxed text-sm">
+                            <div id="gemini-loader" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center rounded-xl hidden">
+                                <div class="loader rounded-full border-4 border-gray-700 h-10 w-10" style="border-top-color: #22D3EE;"></div>
                             </div>
-                            <div id="gemini-data" class="text-gray-300 h-full overflow-y-auto pr-2">
-                                Clicca il pulsante per scoprire cosa sta sorvolando la ISS in questo momento.
+                            <div id="gemini-data" class="h-full overflow-y-auto">
+                                Clicca sul pulsante sottostante per interrogare l'intelligenza artificiale e scoprire cosa sta sorvolando la ISS in questo preciso istante (paesi, rilievi montuosi, oceani o meraviglie naturali).
                             </div>
                         </div>
                     </div>
-                    <button id="fetch-gemini-btn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 shadow-md">
-                        Scopri cosa sorvola la ISS
+                    <button id="fetch-gemini-btn" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 shadow-md flex items-center justify-center gap-2">
+                        <span>Scopri cosa sorvola la ISS adesso</span>
+                        <span>🌍</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Colonna Destra: Live Feed e Donazione -->
-            <div class="space-y-6">
-                <!-- Live Camera Feeds (Molteplici flussi) -->
-                <div class="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-                    <h2 class="font-semibold text-xl mb-4 text-cyan-300">Live dalla ISS</h2>
-                    
-                    <div class="flex flex-col space-y-4">
-                        <!-- FLUSSO 1 -->
-                        <div class="aspect-video bg-black rounded-md overflow-hidden shadow-md border border-gray-700">
-                            <iframe src="https://www.youtube.com/embed/awQzjn72bI0?autoplay=1&mute=1&controls=0"
-                                    title="Live ISS Stream 1"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen>
-                            </iframe>
-                        </div>
-
-                        <!-- FLUSSO 2 -->
-                        <div class="aspect-video bg-black rounded-md overflow-hidden shadow-md border border-gray-700">
-                            <iframe src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=1&mute=1&controls=0"
-                                    title="Live ISS Stream 2"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen>
-                            </iframe>
-                        </div>
-
-                        <!-- FLUSSO 3 -->
-                        <div class="aspect-video bg-black rounded-md overflow-hidden shadow-md border border-gray-700">
-                            <iframe src="https://www.youtube.com/embed/Kj5DjRYkzD8?autoplay=1&mute=1&controls=0"
-                                    title="Live ISS Stream 3"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen>
-                            </iframe>
-                        </div>
+                <!-- ========================================== -->
+                <!-- SEZIONE CURIOSITÀ E SEGRETI SULLA ISS      -->
+                <!-- ========================================== -->
+                <div class="bg-gray-900/80 border border-gray-800 p-6 md:p-8 rounded-2xl shadow-lg space-y-6">
+                    <div class="border-b border-gray-800 pb-4">
+                        <h2 class="font-extrabold text-2xl text-cyan-300 flex items-center gap-2">
+                            <span>✨</span> Curiosità e Dati Sorprendenti sulla ISS
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">
+                            Fatti incredibili sul più grande avamposto umano mai costruito nello spazio.
+                        </p>
                     </div>
-                    
-                    <p class="text-xs text-gray-400 mt-4 text-center">Live feed by NASA. Potrebbe essere nero durante il lato notturno o per perdita di segnale.</p>
-                  </div>
 
-<!-- Blocco AdSense Adattivo e Spaziato -->
-<div class="my-10 w-full bg-gray-800/40 border border-gray-700/60 rounded-2xl p-4 md:p-6 shadow-lg">
-    
-    <!-- Dicitura obbligatoria/consigliata per AdSense -->
-    <div class="text-center mb-3">
-        <span class="text-[11px] uppercase tracking-wider text-gray-500 font-medium">
-            Annuncio pubblicitario
-        </span>
-    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <!-- Curiosità 1 -->
+                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
+                                <span>🌅</span> 16 Albe e 16 Tramonti al Giorno
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-300 leading-relaxed">
+                                Viaggiando a circa <strong>27.600 km/h</strong>, la stazione completa un giro orbitale della Terra ogni <strong>90 minuti circa</strong>. Per gli astronauti a bordo, il sole sorge e tramonta 16 volte ogni 24 ore terrestri.
+                            </p>
+                        </div>
 
-    <!-- Contenitore dell'annuncio con altezza fluida -->
-    <div class="w-full min-h-[250px] md:min-h-[280px] flex items-center justify-center">
-        <!-- Inserisci qui il tuo codice AdSense: -->
-        <ins class="adsbygoogle"
-             style="display:block; text-align:center;"
-             data-ad-layout="in-article"
-             data-ad-format="fluid"
-             data-ad-client="ca-pub-8268426852108056"
-             data-ad-slot="INSERISCI_QUI_IL_TUO_SLOT_ID"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
+                        <!-- Curiosità 2 -->
+                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
+                                <span>🏟️</span> Grande quanto un Campo da Calcio
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-300 leading-relaxed">
+                                Con i suoi pannelli solari spiegati, la ISS misura circa <strong>109 metri per 73</strong> e pesa oltre <strong>450 tonnellate</strong>. È la struttura artificiale più grande mai assemblata nello spazio.
+                            </p>
+                        </div>
 
-</div>
-    <!-- Effetto di Sfondo Decorativo -->
-    <div class="absolute -top-16 -right-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <!-- Curiosità 3 -->
+                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
+                                <span>📹</span> Perché lo schermo video è a volte nero?
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-300 leading-relaxed">
+                                Se il feed dal vivo è completamente scuro, la ISS sta semplicemente attraversando il <strong>lato notturno della Terra</strong>. Se invece appare grigio o con barre di attesa, è in corso un momentaneo passaggio di antenna tra i satelliti TDRS della NASA.
+                            </p>
+                        </div>
 
-    <!-- Etichetta Pubblicità -->
-    <span class="absolute top-4 right-5 z-10 text-xs uppercase font-bold tracking-wider text-gray-300 bg-gray-950/90 px-3 py-1 rounded-md border border-gray-700">
-        Sponsor Ufficiale
-    </span>
+                        <!-- Curiosità 4 -->
+                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
+                                <span>💧</span> Riciclo Totale dell'Acqua
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-300 leading-relaxed">
+                                A bordo non si spreca nulla: un avanzato sistema di purificazione ricicla fino al <strong>98%</strong> di tutti i liquidi presenti nella stazione, inclusi il sudore e l'umidità del respiro dell'equipaggio, trasformandoli in acqua potabile ultra pura.
+                            </p>
+                        </div>
 
-    <div class="flex flex-col md:flex-row items-center justify-between w-full gap-10 relative z-10">
-        
-        <!-- Blocco Icona + Testi -->
-        <div class="flex flex-col md:flex-row items-center md:items-start gap-8 w-full md:w-2/3">
-            <!-- Icona/Logo Grande -->
-            <div class="w-40 h-40 md:w-48 md:h-48 flex-shrink-0 bg-gray-950 rounded-2xl border-2 border-indigo-500/50 flex items-center justify-center shadow-xl">
-                 <span class="text-7xl md:text-8xl">🛸🍽️</span>
-            </div>
+                        <!-- Curiosità 5 -->
+                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2 md:col-span-2">
+                            <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
+                                <span>🧪</span> Un Laboratorio Unico in Microgravità
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-300 leading-relaxed">
+                                L'equipaggio conduce quotidianamente centinaia di esperimenti scientifici impossibili sulla Terra: dalla cristallizzazione delle proteine per nuovi farmaci oncologici allo studio sull'invecchiamento cellulare e sulla crescita dei vegetali per le future missioni su Marte.
+                            </p>
+                        </div>
 
-            <!-- Informazioni -->
-            <div class="flex flex-col text-center md:text-left space-y-4 pt-2">
-                <h3 class="text-4xl md:text-5xl font-extrabold text-indigo-400 tracking-wide">
-                    Il Ristovolante
-                </h3>
-                <p class="text-lg md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto md:mx-0">
-                    L'esperienza culinaria che ti porta in orbita! Goditi i nostri piatti a Torino con una consegna rapida a velocità spaziale.
-                </p>
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm md:text-base text-indigo-200 font-semibold pt-2">
-                    <span class="bg-indigo-950/60 border border-indigo-500/30 px-4 py-2 rounded-lg">📍 Torino (TO)</span>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Pulsante Singolo Pulito -->
-        <div class="w-full md:w-auto flex-shrink-0 flex justify-center">
-            <a href="https://ilristovolantetorino.it" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="inline-flex items-center justify-center gap-3 text-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 px-10 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.5)] hover:shadow-[0_0_35px_rgba(79,70,229,0.8)] hover:-translate-y-1">
-                Esplora il Menù
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-            </a>
+            </div>
+
+            <!-- COLONNA DESTRA (1/3): Video Live e Riquadro Ristorante -->
+            <div class="space-y-8">
+                
+                <!-- Live Video Feed -->
+                <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg space-y-4">
+                    <h2 class="font-bold text-xl text-cyan-300 flex items-center gap-2">
+                        <span>🔴</span> Live dalla Stazione Spaziale
+                    </h2>
+                    
+                    <div class="aspect-video bg-black rounded-xl overflow-hidden border border-gray-700 shadow-inner">
+                        <iframe src="https://www.youtube.com/embed/awQzjn72bI0?autoplay=1&mute=1&controls=0"
+                                title="Live dalla ISS"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+
+                    <p class="text-xs text-gray-400 leading-normal text-center">
+                        Segnale ufficiale trasmesso dalla NASA. Il video può risultare buio durante l'orbita notturna terrestre.
+                    </p>
+                    <div class="text-center pt-1">
+                        <a href="https://www.youtube.com/@NASA/streams" target="_blank" rel="noopener noreferrer" class="text-xs text-cyan-400 hover:text-cyan-300 underline">
+                            Apri la diretta sul canale YouTube della NASA &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- BANNER PUBBLICITARIO: IL RISTOVOLANTE      -->
+                <!-- ========================================== -->
+                <div class="bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-950/80 border-2 border-indigo-500/40 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden space-y-6">
+                    <span class="absolute top-3 right-3 text-[10px] uppercase font-bold tracking-wider text-indigo-300 bg-indigo-950/90 px-2.5 py-1 rounded border border-indigo-800">
+                        Sponsor Locale
+                    </span>
+
+                    <div class="flex flex-col items-center text-center space-y-4 pt-2">
+                        <div class="w-28 h-28 bg-gray-950 rounded-2xl border-2 border-indigo-500/50 flex items-center justify-center shadow-lg">
+                            <span class="text-5xl">🛸🍽️</span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <h3 class="text-2xl md:text-3xl font-extrabold text-indigo-400">
+                                Il Ristovolante
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed">
+                                Un viaggio nei sapori stellari a Torino! Gusta i nostri piatti mentre ammiri lo spazio: consegna a domicilio puntuale a velocità di crociera.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap justify-center gap-2 text-xs text-indigo-200 font-semibold w-full">
+                            <span class="bg-indigo-950/70 border border-indigo-500/30 px-3 py-1.5 rounded-lg">📍 Torino (TO)</span>
+                        
+                        </div>
+
+                        <a href="https://ilristovolantetorino.it" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center justify-center gap-2 w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:scale-[1.02]">
+                            <span>Esplora il Menù Online</span>
+                            <span>&rarr;</span>
+                        </a>
+                    </div>
+
         </div>
-        
-    </div>
-</div>
-    </div>
-</div>
 
         <!-- Disclaimer e Privacy -->
-        <div class="bg-gray-800/50 p-6 rounded-xl text-sm text-gray-400 space-y-3 shadow-lg">
-            <h3 class="font-semibold text-lg text-gray-300">Disclaimer e Privacy</h3>
-            <p>Questa applicazione è fornita solo a scopo educativo e di intrattenimento. I dati sulla posizione sono forniti da un'API di terze parti e non ne è garantita l'accuratezza assoluta. Le informazioni generate da Gemini sono prodotte da un'intelligenza artificiale e potrebbero contenere imprecisioni.</p>
-            <p class="font-semibold">Questa applicazione rispetta la tua privacy: non vengono raccolti, tracciati o memorizzati dati personali degli utenti.</p>
+        <div class="bg-gray-900/60 border border-gray-800 p-6 rounded-2xl text-xs md:text-sm text-gray-400 space-y-2 shadow-lg">
+            <h3 class="font-bold text-base text-gray-300">Disclaimer e Privacy</h3>
+            <p>Questa applicazione web è sviluppata a scopi educativi e divulgativi. I dati orbitali provengono da API pubbliche satellitari. Le risposte descrittive sono fornite da modelli di intelligenza artificiale di Google Gemini.</p>
+            <p class="font-semibold text-gray-300">Nessun dato personale dell'utente viene raccolto o memorizzato da questa applicazione.</p>
         </div>
 
     </main>
 
-     <!-- Footer -->
-    <footer class="text-center text-xs text-cyan-400 py-8 space-y-1">
+    <!-- ========================================== -->
+    <!-- 5. FOOTER COMPLETO                         -->
+    <!-- ========================================== -->
+    <footer class="w-full border-t border-gray-800 py-6 text-center text-xs text-gray-400 space-y-1.5 bg-gray-950">
         <p>Copyright &copy; 2025 Nicola Nicolaci. Tutti i diritti riservati.</p>
         <p>
-            Posizione ISS da <a href="https://wheretheiss.at/" target="_blank" class="underline hover:text-cyan-300">wheretheiss.at</a>
+            Dati orbitali ISS da <a href="https://wheretheiss.at/" target="_blank" class="text-cyan-400 hover:text-cyan-300 underline">wheretheiss.at</a> • Sviluppato con Gemini e three.js
         </p>
-        <p>Sviluppato con Gemini & three.js</p>
     </footer>
 
+    <!-- ========================================== -->
+    <!-- 6. JAVASCRIPT: THREE.JS & TELEMETRIA       -->
+    <!-- ========================================== -->
     <script>
-        // --- SETUP ---
         const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
         
         const domElements = {
@@ -300,22 +334,22 @@
         
         let currentIssData = null;
 
-        // --- THREE.JS SETUP ---
+        // THREE.JS SETUP
         let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
         const EARTH_RADIUS = 100;
 
         function initGlobe() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, domElements.globeContainer.clientWidth / domElements.globeContainer.clientHeight, 0.1, 3000);
-            camera.position.z = 250;
+            camera.position.z = 240;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             domElements.globeContainer.appendChild(renderer.domElement);
 
-            scene.add(new THREE.AmbientLight(0xcccccc, 0.6));
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            scene.add(new THREE.AmbientLight(0xcccccc, 0.7));
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.4);
             directionalLight.position.set(-100, 30, 50);
             scene.add(directionalLight);
 
@@ -324,7 +358,6 @@
             controls.dampingFactor = 0.05;
             controls.minDistance = 120;
             controls.maxDistance = 500;
-            controls.autoRotate = false;
 
             const loader = new THREE.TextureLoader();
 
@@ -347,21 +380,20 @@
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-clouds.png'),
                 transparent: true,
-                opacity: 0.4
+                opacity: 0.35
             });
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
             issMarker = new THREE.Group();
-            
-            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xcb4335, metalness: 0.7, roughness: 0.3 });
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x00e5ff, metalness: 0.8, roughness: 0.2 });
             const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 6, 16);
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             body.rotation.z = Math.PI / 2;
             issMarker.add(body);
 
-            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x943126, metalness: 0.1, roughness: 0.8, side: THREE.DoubleSide });
-            const panelGeometry = new THREE.BoxGeometry(8, 4, 0.1);
+            const panelMaterial = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.2, roughness: 0.7, side: THREE.DoubleSide });
+            const panelGeometry = new THREE.BoxGeometry(8, 3.8, 0.1);
             const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
             panel1.position.x = 6;
             issMarker.add(panel1);
@@ -370,11 +402,11 @@
             panel2.position.x = -6;
             issMarker.add(panel2);
 
-            issMarker.scale.set(0.35, 0.35, 0.35);
+            issMarker.scale.set(0.4, 0.4, 0.4);
             scene.add(issMarker);
 
             const starVertices = [];
-            for (let i = 0; i < 20000; i++) {
+            for (let i = 0; i < 15000; i++) {
                 const x = THREE.MathUtils.randFloatSpread(4000);
                 const y = THREE.MathUtils.randFloatSpread(4000);
                 const z = THREE.MathUtils.randFloatSpread(4000);
@@ -382,7 +414,7 @@
             }
             const starGeometry = new THREE.BufferGeometry();
             starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.9 });
+            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.8 });
             stars = new THREE.Points(starGeometry, starMaterial);
             scene.add(stars);
 
@@ -397,8 +429,8 @@
             stars.rotation.y += 0.00002;
 
             if (issMarker && issMarker.position.length() > 1) {
-                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(250);
-                camera.position.lerp(desiredPosition, 0.03);
+                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(240);
+                camera.position.lerp(desiredPosition, 0.02);
                 controls.target.set(0, 0, 0);
                 issMarker.lookAt(earth.position);
             }
@@ -422,7 +454,6 @@
         }
 
         async function fetchGeminiInfo(lat, lon) {
-            console.log("Requesting info from Netlify function for:", lat, lon);
             domElements.geminiLoader.classList.remove('hidden');
             domElements.fetchGeminiBtn.disabled = true;
             domElements.fetchGeminiBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -436,20 +467,17 @@
                     body: JSON.stringify({ lat, lon })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Errore dalla funzione serverless: status ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`Errore: status ${response.status}`);
                 const result = await response.json();
 
                 if (result.text) {
                     domElements.geminiData.innerHTML = result.text.replace(/\n/g, '<br>');
                 } else {
-                    throw new Error("Risposta non valida dalla funzione serverless.");
+                    throw new Error("Risposta vuota da Gemini.");
                 }
             } catch (error) {
-                console.error("Errore nel chiamare la funzione Netlify:", error);
-                domElements.geminiData.textContent = "Impossibile contattare il server. Riprova tra poco.";
+                console.error("Errore Netlify Gemini:", error);
+                domElements.geminiData.textContent = "Impossibile recuperare i dettagli da Gemini in questo momento. Riprova tra poco.";
             } finally {
                 domElements.geminiLoader.classList.add('hidden');
                 domElements.fetchGeminiBtn.disabled = false;
@@ -460,11 +488,10 @@
         async function updateIssPosition() {
             try {
                 const response = await fetch(issApiUrl);
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Errore di rete');
                 const data = await response.json();
                 
                 currentIssData = data;
-                
                 const { latitude, longitude, altitude, velocity } = data;
                 
                 domElements.lat.textContent = latitude.toFixed(4);
@@ -474,9 +501,8 @@
 
                 const issRadius = EARTH_RADIUS + (altitude / 100);
                 issMarker.position.copy(latLonToVector3(latitude, longitude, issRadius));
-
             } catch (error) {
-                console.error('Errore nel recuperare i dati della ISS:', error);
+                console.error('Errore ISS API:', error);
                 domElements.lat.textContent = "Errore";
                 domElements.lon.textContent = "Errore";
                 currentIssData = null;
@@ -492,7 +518,7 @@
                 if (currentIssData) {
                     fetchGeminiInfo(currentIssData.latitude, currentIssData.longitude);
                 } else {
-                    domElements.geminiData.textContent = "Dati di posizione non ancora disponibili. Attendi qualche secondo e riprova.";
+                    domElements.geminiData.textContent = "Dati di posizione in aggiornamento. Riprova tra un istante.";
                 }
             });
         });
