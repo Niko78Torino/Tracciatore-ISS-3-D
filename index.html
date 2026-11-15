@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracciatore ISS 3D con Dati da Gemini</title>
-    
-    <!-- Google AdSense -->
-    <meta name="google-adsense-account" content="ca-pub-8268426852108056">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8268426852108056"
-     crossorigin="anonymous"></script>
+
+    <!-- Configurazione PWA per Google Play Store -->
+    <meta name="theme-color" content="#030712">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- three.js e OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,7 +97,7 @@
     <section class="w-full h-[400px] md:h-[480px] bg-gray-900 relative overflow-hidden border-b border-gray-800 shadow-inner">
         <div id="globeContainer" class="w-full h-full"></div>
         <div class="absolute bottom-3 left-4 pointer-events-none bg-gray-950/60 backdrop-blur-sm px-3 py-1 rounded text-[11px] text-gray-400 border border-gray-800">
-            Trascina per ruotare la visuale • Rotellina per zoomare
+            Trascina per ruotare la visuale • Rotellina o pizzico per zoomare
         </div>
     </section>
 
@@ -176,7 +176,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         
                         <!-- Curiosità 1 -->
-                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-xl space-y-2">
                             <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
                                 <span>🌅</span> 16 Albe e 16 Tramonti al Giorno
                             </h3>
@@ -186,7 +186,7 @@
                         </div>
 
                         <!-- Curiosità 2 -->
-                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-xl space-y-2">
                             <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
                                 <span>🏟️</span> Grande quanto un Campo da Calcio
                             </h3>
@@ -196,7 +196,7 @@
                         </div>
 
                         <!-- Curiosità 3 -->
-                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-xl space-y-2">
                             <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
                                 <span>📹</span> Perché lo schermo video è a volte nero?
                             </h3>
@@ -206,7 +206,7 @@
                         </div>
 
                         <!-- Curiosità 4 -->
-                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2">
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-xl space-y-2">
                             <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
                                 <span>💧</span> Riciclo Totale dell'Acqua
                             </h3>
@@ -216,7 +216,7 @@
                         </div>
 
                         <!-- Curiosità 5 -->
-                        <div class="bg-gray-800/40 border border-gray-750 p-4 rounded-xl space-y-2 md:col-span-2">
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-4 rounded-xl space-y-2 md:col-span-2">
                             <h3 class="font-bold text-cyan-300 text-base flex items-center gap-2">
                                 <span>🧪</span> Un Laboratorio Unico in Microgravità
                             </h3>
@@ -230,20 +230,19 @@
 
             </div>
 
-            <!-- COLONNA DESTRA (1/3): Video Live e Riquadro Ristorante -->
+            <!-- COLONNA DESTRA (1/3): Video Live NASA -->
             <div class="space-y-8">
-                
-                <!-- Live Video Feed -->
                 <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg space-y-4">
                     <h2 class="font-bold text-xl text-cyan-300 flex items-center gap-2">
                         <span>🔴</span> Live dalla Stazione Spaziale
                     </h2>
                     
                     <div class="aspect-video bg-black rounded-xl overflow-hidden border border-gray-700 shadow-inner">
-                        <iframe src="https://www.youtube.com/embed/awQzjn72bI0?autoplay=1&mute=1&controls=0"
-                                title="Live dalla ISS"
+                        <iframe src="https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1&mute=1"
+                                title="Live dalla ISS - NASA"
                                 frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 allowfullscreen>
                         </iframe>
                     </div>
@@ -257,68 +256,34 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- ========================================== -->
-                <!-- BANNER PUBBLICITARIO: IL RISTOVOLANTE      -->
-                <!-- ========================================== -->
-                <div class="bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-950/80 border-2 border-indigo-500/40 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden space-y-6">
-                    <span class="absolute top-3 right-3 text-[10px] uppercase font-bold tracking-wider text-indigo-300 bg-indigo-950/90 px-2.5 py-1 rounded border border-indigo-800">
-                        Sponsor Locale
-                    </span>
-
-                    <div class="flex flex-col items-center text-center space-y-4 pt-2">
-                        <div class="w-28 h-28 bg-gray-950 rounded-2xl border-2 border-indigo-500/50 flex items-center justify-center shadow-lg">
-                            <span class="text-5xl">🛸🍽️</span>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <h3 class="text-2xl md:text-3xl font-extrabold text-indigo-400">
-                                Il Ristovolante
-                            </h3>
-                            <p class="text-sm text-gray-300 leading-relaxed">
-                                Un viaggio nei sapori stellari a Torino! Gusta i nostri piatti mentre ammiri lo spazio.
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap justify-center gap-2 text-xs text-indigo-200 font-semibold w-full">
-                            <span class="bg-indigo-950/70 border border-indigo-500/30 px-3 py-1.5 rounded-lg">📍 Torino (TO)</span>
-                        
-                        </div>
-
-                        <a href="https://ilristovolantetorino.it" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="inline-flex items-center justify-center gap-2 w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:scale-[1.02]">
-                            <span>Esplora il Menù Online</span>
-                            <span>&rarr;</span>
-                        </a>
-                    </div>
+            </div>
 
         </div>
 
         <!-- Disclaimer e Privacy -->
         <div class="bg-gray-900/60 border border-gray-800 p-6 rounded-2xl text-xs md:text-sm text-gray-400 space-y-2 shadow-lg">
             <h3 class="font-bold text-base text-gray-300">Disclaimer e Privacy</h3>
-            <p>Questa applicazione web è sviluppata a scopi educativi e divulgativi. I dati orbitali provengono da API pubbliche satellitari. Le risposte descrittive sono fornite da modelli di intelligenza artificiale di Google Gemini.</p>
+            <p>Questa applicazione è sviluppata a scopi educativi e divulgativi. I dati orbitali provengono da API pubbliche satellitari. Le risposte descrittive sono fornite da modelli di intelligenza artificiale di Google Gemini.</p>
             <p class="font-semibold text-gray-300">Nessun dato personale dell'utente viene raccolto o memorizzato da questa applicazione.</p>
         </div>
 
     </main>
 
     <!-- ========================================== -->
-    <!-- 5. FOOTER COMPLETO                         -->
+    <!-- 4. FOOTER COMPLETO                         -->
     <!-- ========================================== -->
     <footer class="w-full border-t border-gray-800 py-6 text-center text-xs text-gray-400 space-y-1.5 bg-gray-950">
-        <p>Copyright &copy; 2025 Nicola Nicolaci. Tutti i diritti riservati.</p>
+        <p>Copyright &copy; 2026 Nicola Nicolaci. Tutti i diritti riservati.</p>
         <p>
-            Dati orbitali ISS da <a href="https://wheretheiss.at/" target="_blank" class="text-cyan-400 hover:text-cyan-300 underline">wheretheiss.at</a> • Sviluppato con Gemini e three.js
+            Dati orbitali ISS da <a href="https://wheretheiss.at/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 underline">wheretheiss.at</a> &bull; 
+            <a href="privacy.html" class="text-cyan-400 hover:text-cyan-300 underline">Norme sulla Privacy</a>
         </p>
     </footer>
 
     <!-- ========================================== -->
-    <!-- 6. JAVASCRIPT: THREE.JS & TELEMETRIA       -->
+    <!-- 5. JAVASCRIPT: THREE.JS & TELEMETRIA       -->
     <!-- ========================================== -->
-   <script>
+    <script>
         const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
         
         const domElements = {
@@ -333,6 +298,7 @@
         };
         
         let currentIssData = null;
+        let initialCameraCentered = false;
 
         // THREE.JS SETUP
         let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
@@ -385,21 +351,17 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             scene.add(clouds);
 
-            // ==========================================
-            // MODIFICHE NAVICELLA ISS
-            // ==========================================
+            // NAVICELLA ISS
             issMarker = new THREE.Group();
             
-            // Corpo centrale: Colore Rosso Cremisi brillante a forte contrasto
             const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff2a2a, metalness: 0.5, roughness: 0.3 });
-            const bodyGeometry = new THREE.CylinderGeometry(1.2, 1.2, 7, 16); // Leggermente più largo e lungo
+            const bodyGeometry = new THREE.CylinderGeometry(1.2, 1.2, 7, 16);
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             body.rotation.z = Math.PI / 2;
             issMarker.add(body);
 
-            // Pannelli solari: Colore Arancione scuro / Rame
             const panelMaterial = new THREE.MeshStandardMaterial({ color: 0xd95a00, metalness: 0.2, roughness: 0.8, side: THREE.DoubleSide });
-            const panelGeometry = new THREE.BoxGeometry(10, 5, 0.3); // Pannelli più estesi e leggermente più spessi
+            const panelGeometry = new THREE.BoxGeometry(10, 5, 0.3);
             
             const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
             panel1.position.x = 7.5;
@@ -409,10 +371,8 @@
             panel2.position.x = -7.5;
             issMarker.add(panel2);
 
-            // SCALA GLOBALE NAVICELLA: Notevolmente ingrandita (da 0.4 a 0.85)
             issMarker.scale.set(0.85, 0.85, 0.85);
             scene.add(issMarker);
-            // ==========================================
 
             const starVertices = [];
             for (let i = 0; i < 15000; i++) {
@@ -438,9 +398,11 @@
             stars.rotation.y += 0.00002;
 
             if (issMarker && issMarker.position.length() > 1) {
-                const desiredPosition = issMarker.position.clone().normalize().multiplyScalar(240);
-                camera.position.lerp(desiredPosition, 0.02);
-                controls.target.set(0, 0, 0);
+                if (!initialCameraCentered) {
+                    camera.position.copy(issMarker.position.clone().normalize().multiplyScalar(240));
+                    controls.target.set(0, 0, 0);
+                    initialCameraCentered = true;
+                }
                 issMarker.lookAt(earth.position);
             }
             controls.update();
@@ -530,5 +492,11 @@
                     domElements.geminiData.textContent = "Dati di posizione in aggiornamento. Riprova tra un istante.";
                 }
             });
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js').catch(() => {});
+            }
         });
     </script>
+</body>
+</html>
