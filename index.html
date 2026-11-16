@@ -17,6 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
+    <!-- satellite.js per calcolo orbita 3D e passaggi visibili -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,8 +60,8 @@
                 </div>
                 <p class="text-gray-300 text-sm md:text-base leading-relaxed">
                     Esplora la posizione in tempo reale della <strong>Stazione Spaziale Internazionale (ISS)</strong>. 
-                    Osserva la sua orbita su un globo 3D con illuminazione solare live, monitora la telemetria, 
-                    scopri il territorio sottostante grazie all'AI di <strong>Gemini</strong> e guarda le immagini in diretta.
+                    Segui la sua traiettoria orbitale su un globo 3D con illuminazione solare live, calcola i prossimi 
+                    passaggi visibili sopra la tua città e scopri il territorio sottostante con <strong>Gemini AI</strong>.
                 </p>
             </div>
             
@@ -73,23 +76,33 @@
     </header>
 
     <!-- 2. GLOBO 3D THREE.JS -->
-    <section class="w-full h-[450px] md:h-[550px] bg-black relative overflow-hidden border-b border-gray-800 shadow-inner">
-        <!-- Pulsante Segui ISS -->
-        <div class="absolute top-4 right-4 z-10">
-            <button id="follow-btn" class="bg-gray-900/80 border border-gray-700 text-gray-300 px-4 py-2 rounded-xl text-sm font-semibold backdrop-blur-md shadow-lg flex items-center gap-2 hover:bg-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500">
+    <section class="w-full h-[460px] md:h-[560px] bg-black relative overflow-hidden border-b border-gray-800 shadow-inner">
+        <!-- Controlli Telecamera 3D -->
+        <div class="absolute top-4 right-4 z-10 flex flex-wrap justify-end gap-2">
+            <button id="follow-btn" class="bg-gray-900/85 border border-gray-700 text-gray-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold backdrop-blur-md shadow-lg flex items-center gap-1.5 hover:bg-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500">
                 <span>🎯</span> <span id="follow-text">Segui ISS: OFF</span>
+            </button>
+            <button id="cupola-btn" class="bg-gray-900/85 border border-gray-700 text-gray-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold backdrop-blur-md shadow-lg flex items-center gap-1.5 hover:bg-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <span>🔭</span> <span id="cupola-text">Vista Cupola: OFF</span>
             </button>
         </div>
         
         <div id="globeContainer" class="w-full h-full"></div>
         
-        <div class="absolute bottom-3 left-4 pointer-events-none bg-gray-950/60 backdrop-blur-sm px-3 py-1.5 rounded text-[11px] text-gray-400 border border-gray-800">
+        <div class="absolute bottom-3 left-4 pointer-events-none bg-gray-950/70 backdrop-blur-sm px-3 py-1.5 rounded text-[11px] text-gray-400 border border-gray-800 hidden sm:block">
             Trascina per ruotare • Rotellina/Pizzico per zoomare
         </div>
-        <!-- Legenda anello -->
-        <div class="absolute bottom-3 right-4 pointer-events-none bg-gray-950/60 backdrop-blur-sm px-3 py-1.5 rounded flex items-center gap-2 border border-gray-800">
-            <div class="w-3 h-3 rounded-full border-2 border-cyan-400/80"></div>
-            <span class="text-[11px] text-gray-400">Area di visibilità</span>
+
+        <!-- Legenda Orbita e Visibilità -->
+        <div class="absolute bottom-3 right-4 pointer-events-none bg-gray-950/70 backdrop-blur-sm px-3 py-1.5 rounded flex items-center gap-3 border border-gray-800">
+            <div class="flex items-center gap-1.5">
+                <span class="w-4 h-0.5 bg-cyan-400 inline-block"></span>
+                <span class="text-[11px] text-gray-300">Orbita 90m</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <div class="w-3 h-3 rounded-full border-2 border-cyan-400/80"></div>
+                <span class="text-[11px] text-gray-300">Visibilità</span>
+            </div>
         </div>
     </section>
 
@@ -97,15 +110,14 @@
     <main class="max-w-7xl mx-auto p-4 md:p-8 flex-grow w-full space-y-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- COLONNA SINISTRA (2/3): Dati e AI -->
+            <!-- COLONNA SINISTRA (2/3): Telemetria, Radar Avvistamenti e Gemini AI -->
             <div class="lg:col-span-2 space-y-8">
                 
                 <!-- Dati Telemetrici Estesi -->
                 <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg">
                     <h2 class="font-bold text-xl mb-4 text-cyan-300 flex items-center gap-2">
-                        <span>📡</span> Telemetria di Bordo In Tempo Reale
+                        <span>📡</span> Telemetria di Bordo in Tempo Reale
                     </h2>
-                    <!-- Modificata la griglia per accogliere 6 elementi (3 colonne su tablet/desktop) -->
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                         <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
                             <p class="text-[10px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">Latitudine</p>
@@ -123,7 +135,6 @@
                             <p class="text-[10px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">Velocità</p>
                             <p id="vel" class="font-mono text-lg sm:text-xl lg:text-2xl text-emerald-400 font-bold mt-1">---- km/h</p>
                         </div>
-                        <!-- Nuovi Moduli -->
                         <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
                             <p class="text-[10px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">Illuminazione Sole</p>
                             <p id="vis-status" class="font-sans text-sm sm:text-base lg:text-lg font-bold mt-2 text-gray-500">In calcolo...</p>
@@ -131,6 +142,44 @@
                         <div class="bg-gray-800/60 border border-gray-700/50 p-4 rounded-xl">
                             <p class="text-[10px] sm:text-xs uppercase tracking-wider text-gray-400 font-semibold">Diametro Visibilità</p>
                             <p id="footprint-val" class="font-mono text-lg sm:text-xl lg:text-2xl text-cyan-400 font-bold mt-1">---- km</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RADAR AVVISTAMENTI: Quando passa sopra di me? -->
+                <div class="bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-lg space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="font-bold text-xl text-cyan-300 flex items-center gap-2">
+                                <span>🌠</span> Radar Avvistamenti: Quando Passa Sopra di Me?
+                            </h2>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Calcola i prossimi passaggi della ISS nei prossimi 3 giorni sulla tua posizione e individua quelli visibili a occhio nudo.
+                            </p>
+                        </div>
+                        <button id="locate-user-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 flex-shrink-0">
+                            <span>📍</span> <span>Usa la mia posizione</span>
+                        </button>
+                    </div>
+
+                    <!-- Inserimento manuale opzionale / Stato coordinate -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-gray-800/40 border border-gray-700/50 px-4 py-2.5 rounded-xl text-xs">
+                        <span id="user-coords-label" class="text-gray-400">
+                            Nessuna posizione impostata. Premi <strong>Usa la mia posizione</strong> o inserisci le coordinate:
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="any" id="manual-lat" placeholder="Lat (es. 45.07)" class="w-28 bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-gray-200 focus:outline-none focus:border-cyan-500">
+                            <input type="number" step="any" id="manual-lon" placeholder="Lon (es. 7.68)" class="w-28 bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-gray-200 focus:outline-none focus:border-cyan-500">
+                            <button id="manual-calc-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-3 py-1 rounded-lg transition-colors">
+                                Calcola
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Risultati passaggi -->
+                    <div id="passes-container" class="space-y-2.5">
+                        <div class="text-center py-6 text-xs text-gray-500 border border-dashed border-gray-800 rounded-xl">
+                            Imposta la tua posizione per visualizzare gli orari esatti, la durata e la direzione in cielo dei prossimi sorvoli.
                         </div>
                     </div>
                 </div>
@@ -168,7 +217,6 @@
                     </h2>
                     
                     <div class="aspect-video bg-black rounded-xl overflow-hidden border border-gray-700 shadow-inner">
-                        <!-- URL aggiornato con nE2g3jS1r00 e playsinline=1 per Android -->
                         <iframe src="https://www.youtube.com/embed/nE2g3jS1r00?autoplay=1&mute=1&playsinline=1"
                                 title="Live dalla ISS - NASA"
                                 frameborder="0"
@@ -191,8 +239,8 @@
                 <!-- Disclaimer -->
                 <div class="bg-gray-900/60 border border-gray-800 p-6 rounded-2xl text-xs text-gray-400 space-y-2 shadow-lg">
                     <h3 class="font-bold text-base text-gray-300">Disclaimer e Privacy</h3>
-                    <p>Applicazione a scopi educativi. Dati orbitali da API pubbliche satellitari. Risposte fornite dall'AI di Google Gemini.</p>
-                    <p class="font-semibold text-gray-300">Nessun dato personale dell'utente viene raccolto o tracciato.</p>
+                    <p>Applicazione a scopi educativi. Dati orbitali e TLE da API pubbliche satellitari. Risposte fornite dall'AI di Google Gemini.</p>
+                    <p class="font-semibold text-gray-300">La posizione GPS viene elaborata esclusivamente sul tuo dispositivo per calcolare i passaggi della ISS e non viene inviata o salvata su alcun server.</p>
                 </div>
             </div>
         </div>
@@ -207,9 +255,10 @@
         </p>
     </footer>
 
-    <!-- 5. JAVASCRIPT: THREE.JS & TELEMETRIA -->
+    <!-- 5. JAVASCRIPT: THREE.JS, SATELLITE.JS & TELEMETRIA -->
     <script>
         const issApiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
+        const issTleUrl = 'https://api.wheretheiss.at/v1/satellites/25544/tles';
         
         const domElements = {
             lat: document.getElementById('lat'),
@@ -223,16 +272,27 @@
             globeContainer: document.getElementById('globeContainer'),
             fetchGeminiBtn: document.getElementById('fetch-gemini-btn'),
             followBtn: document.getElementById('follow-btn'),
-            followText: document.getElementById('follow-text')
+            followText: document.getElementById('follow-text'),
+            cupolaBtn: document.getElementById('cupola-btn'),
+            cupolaText: document.getElementById('cupola-text'),
+            locateUserBtn: document.getElementById('locate-user-btn'),
+            manualLat: document.getElementById('manual-lat'),
+            manualLon: document.getElementById('manual-lon'),
+            manualCalcBtn: document.getElementById('manual-calc-btn'),
+            userCoordsLabel: document.getElementById('user-coords-label'),
+            passesContainer: document.getElementById('passes-container')
         };
         
         let currentIssData = null;
+        let satrec = null;
+        let userCoords = null;
         let initialCameraCentered = false;
         let isFollowingISS = false;
+        let isCupolaView = false;
 
         // THREE.JS SETUP
         let scene, camera, renderer, controls, earth, issMarker, stars, clouds;
-        let directionalLight, footprintMesh;
+        let directionalLight, footprintMesh, orbitLine, userPin;
         const EARTH_RADIUS = 100;
 
         function initGlobe() {
@@ -245,10 +305,8 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             domElements.globeContainer.appendChild(renderer.domElement);
 
-            // Luce d'ambiente leggera per non rendere la notte completamente nera
             scene.add(new THREE.AmbientLight(0x222222));
             
-            // Luce Direzionale (IL SOLE) - la sua posizione sarà aggiornata live
             directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
             directionalLight.position.set(0, 0, 500); 
             scene.add(directionalLight);
@@ -256,12 +314,12 @@
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 115;
+            controls.minDistance = 112;
             controls.maxDistance = 600;
 
             const loader = new THREE.TextureLoader();
 
-            // Terra
+            // Terra (fissa rispetto al sistema di coordinate Lat/Lon)
             const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
             const earthMaterial = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
@@ -278,11 +336,11 @@
             scene.add(earth);
 
             // Nuvole
-            const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.2, 64, 64);
+            const cloudGeometry = new THREE.SphereGeometry(EARTH_RADIUS + 1.1, 64, 64);
             const cloudMaterial = new THREE.MeshPhongMaterial({
                 map: loader.load('https://unpkg.com/three-globe@2.27.2/example/img/earth-clouds.png'),
                 transparent: true,
-                opacity: 0.4,
+                opacity: 0.38,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
             });
@@ -291,20 +349,38 @@
 
             // Impronta di Visibilità (Cerchio a terra)
             const fpGeo = new THREE.RingGeometry(0.001, 1, 64);
-            const fpMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
+            const fpMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE, transparent: true, opacity: 0.14, side: THREE.DoubleSide });
             footprintMesh = new THREE.Mesh(fpGeo, fpMat);
-            // Bordo dell'impronta
             const fpEdgeGeo = new THREE.RingGeometry(0.97, 1, 64);
-            const fpEdgeMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
-            const footprintEdge = new THREE.Mesh(fpEdgeGeo, fpEdgeMat);
-            footprintMesh.add(footprintEdge);
+            const fpEdgeMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE, transparent: true, opacity: 0.65, side: THREE.DoubleSide });
+            footprintMesh.add(new THREE.Mesh(fpEdgeGeo, fpEdgeMat));
             scene.add(footprintMesh);
 
-            // NAVICELLA ISS (Modello Costruito)
+            // Traiettoria Orbitale 3D (90 minuti futuri)
+            const orbitGeo = new THREE.BufferGeometry();
+            const orbitMat = new THREE.LineBasicMaterial({ color: 0x38BDF8, transparent: true, opacity: 0.75 });
+            orbitLine = new THREE.Line(orbitGeo, orbitMat);
+            scene.add(orbitLine);
+
+            // Segnaposto Posizione Utente
+            userPin = new THREE.Group();
+            const pinDot = new THREE.Mesh(
+                new THREE.SphereGeometry(1.1, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0x10B981 })
+            );
+            const pinRing = new THREE.Mesh(
+                new THREE.RingGeometry(1.5, 2.3, 32),
+                new THREE.MeshBasicMaterial({ color: 0x34D399, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+            );
+            userPin.add(pinDot);
+            userPin.add(pinRing);
+            userPin.visible = false;
+            scene.add(userPin);
+
+            // NAVICELLA ISS
             issMarker = new THREE.Group();
             const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff2a2a, metalness: 0.5, roughness: 0.3 });
-            const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 5, 16);
-            const body = new THREE.Mesh(bodyGeo, bodyMaterial);
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 5, 16), bodyMaterial);
             body.rotation.z = Math.PI / 2;
             issMarker.add(body);
 
@@ -326,8 +402,7 @@
                 const x = THREE.MathUtils.randFloatSpread(3000);
                 const y = THREE.MathUtils.randFloatSpread(3000);
                 const z = THREE.MathUtils.randFloatSpread(3000);
-                // Evita che le stelle siano dentro o troppo vicine alla terra
-                if(Math.abs(x) > 200 || Math.abs(y) > 200 || Math.abs(z) > 200) {
+                if (Math.abs(x) > 200 || Math.abs(y) > 200 || Math.abs(z) > 200) {
                     starVertices.push(x, y, z);
                 }
             }
@@ -350,32 +425,71 @@
             return new THREE.Vector3(x, y, z);
         }
 
+        // Calcola la direzione di marcia 3D della ISS usando satellite.js (o fallback)
+        function getIssForwardVector() {
+            if (satrec && typeof satellite !== 'undefined') {
+                const now = new Date();
+                const future = new Date(now.getTime() + 15000); // +15 secondi
+                const pvNow = satellite.propagate(satrec, now);
+                const pvFut = satellite.propagate(satrec, future);
+                if (pvNow.position && pvFut.position) {
+                    const gmstNow = satellite.gstime(now);
+                    const gmstFut = satellite.gstime(future);
+                    const gdNow = satellite.eciToGeodetic(pvNow.position, gmstNow);
+                    const gdFut = satellite.eciToGeodetic(pvFut.position, gmstFut);
+                    const p1 = latLonToVector3(satellite.degreesLat(gdNow.latitude), satellite.degreesLong(gdNow.longitude), EARTH_RADIUS + (gdNow.height / 80));
+                    const p2 = latLonToVector3(satellite.degreesLat(gdFut.latitude), satellite.degreesLong(gdFut.longitude), EARTH_RADIUS + (gdFut.height / 80));
+                    return p2.sub(p1).normalize();
+                }
+            }
+            // Fallback tangente
+            const up = issMarker.position.clone().normalize();
+            return new THREE.Vector3(0, 1, 0).cross(up).normalize();
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             
-            // Rotazioni naturali leggere
-            if (!isFollowingISS) {
-                earth.rotation.y += 0.00005;
-                clouds.rotation.y += 0.00006;
-                stars.rotation.y += 0.00002;
-            } else if (issMarker && issMarker.position.length() > 1) {
-                // Modalità "Segui ISS": muovi fluidamente la camera sopra la ISS
-                const currentDist = camera.position.length();
-                const targetCamPos = issMarker.position.clone().normalize().multiplyScalar(currentDist);
-                camera.position.lerp(targetCamPos, 0.05);
-                controls.target.set(0, 0, 0); // Mantieni il fuoco al centro della Terra
-            }
+            clouds.rotation.y += 0.00004;
+            stars.rotation.y += 0.000015;
 
             if (issMarker && issMarker.position.length() > 1) {
-                if (!initialCameraCentered) {
+                const forward = getIssForwardVector();
+                const up = issMarker.position.clone().normalize();
+
+                // Orienta la ISS con il muso nella direzione di volo e la pancia verso la Terra
+                const targetLook = issMarker.position.clone().add(forward);
+                issMarker.up.copy(up);
+                issMarker.lookAt(targetLook);
+
+                if (isCupolaView) {
+                    // VISTA DALLA CUPOLA: dietro e leggermente sopra la ISS, guardando l'orizzonte terrestre
+                    const camPos = issMarker.position.clone()
+                        .addScaledVector(forward, -10)
+                        .addScaledVector(up, 3.8);
+                    const lookTarget = issMarker.position.clone()
+                        .addScaledVector(forward, 42)
+                        .addScaledVector(up, -14);
+
+                    camera.position.lerp(camPos, 0.08);
+                    camera.up.set(0, 1, 0);
+                    camera.lookAt(lookTarget);
+                } else if (isFollowingISS) {
+                    // SEGUI ISS: telecamera orbitale agganciata sopra la stazione
+                    const currentDist = Math.max(140, camera.position.length());
+                    const targetCamPos = issMarker.position.clone().normalize().multiplyScalar(currentDist);
+                    camera.position.lerp(targetCamPos, 0.05);
+                    controls.target.set(0, 0, 0);
+                } else if (!initialCameraCentered) {
                     camera.position.copy(issMarker.position.clone().normalize().multiplyScalar(260));
                     controls.target.set(0, 0, 0);
                     initialCameraCentered = true;
                 }
-                issMarker.lookAt(earth.position);
             }
             
-            controls.update();
+            if (!isCupolaView) {
+                controls.update();
+            }
             renderer.render(scene, camera);
         }
 
@@ -385,19 +499,278 @@
             renderer.setSize(domElements.globeContainer.clientWidth, domElements.globeContainer.clientHeight);
         }
 
-        // Funzione Bottone "Segui ISS"
-        domElements.followBtn.addEventListener('click', () => {
-            isFollowingISS = !isFollowingISS;
+        function syncCameraButtonsUI() {
+            // Segui ISS UI
             if (isFollowingISS) {
-                domElements.followBtn.classList.replace('bg-gray-900/80', 'bg-cyan-900/90');
+                domElements.followBtn.classList.replace('bg-gray-900/85', 'bg-cyan-900/90');
                 domElements.followBtn.classList.replace('border-gray-700', 'border-cyan-400');
-                domElements.followBtn.classList.replace('text-gray-300', 'text-white');
+                domElements.followBtn.classList.replace('text-gray-200', 'text-white');
                 domElements.followText.textContent = 'Segui ISS: ON';
             } else {
-                domElements.followBtn.classList.replace('bg-cyan-900/90', 'bg-gray-900/80');
+                domElements.followBtn.classList.replace('bg-cyan-900/90', 'bg-gray-900/85');
                 domElements.followBtn.classList.replace('border-cyan-400', 'border-gray-700');
-                domElements.followBtn.classList.replace('text-white', 'text-gray-300');
+                domElements.followBtn.classList.replace('text-white', 'text-gray-200');
                 domElements.followText.textContent = 'Segui ISS: OFF';
+            }
+
+            // Vista Cupola UI
+            if (isCupolaView) {
+                domElements.cupolaBtn.classList.replace('bg-gray-900/85', 'bg-indigo-900/90');
+                domElements.cupolaBtn.classList.replace('border-gray-700', 'border-indigo-400');
+                domElements.cupolaBtn.classList.replace('text-gray-200', 'text-white');
+                domElements.cupolaText.textContent = 'Vista Cupola: ON';
+                controls.enabled = false;
+            } else {
+                domElements.cupolaBtn.classList.replace('bg-indigo-900/90', 'bg-gray-900/85');
+                domElements.cupolaBtn.classList.replace('border-indigo-400', 'border-gray-700');
+                domElements.cupolaBtn.classList.replace('text-white', 'text-gray-200');
+                domElements.cupolaText.textContent = 'Vista Cupola: OFF';
+                controls.enabled = true;
+            }
+        }
+
+        domElements.followBtn.addEventListener('click', () => {
+            isFollowingISS = !isFollowingISS;
+            if (isFollowingISS) isCupolaView = false;
+            syncCameraButtonsUI();
+        });
+
+        domElements.cupolaBtn.addEventListener('click', () => {
+            isCupolaView = !isCupolaView;
+            if (isCupolaView) {
+                isFollowingISS = false;
+            } else if (issMarker && issMarker.position.length() > 1) {
+                // Ripristina una vista orbitale comoda all'uscita dalla Cupola
+                camera.position.copy(issMarker.position.clone().normalize().multiplyScalar(240));
+                controls.target.set(0, 0, 0);
+            }
+            syncCameraButtonsUI();
+        });
+
+        // Carica TLE ufficiali per disegnare la traiettoria 3D e calcolare i passaggi
+        async function fetchTleData() {
+            try {
+                const res = await fetch(issTleUrl);
+                if (!res.ok) throw new Error('Errore TLE');
+                const tleData = await res.json();
+                if (tleData.line1 && tleData.line2 && typeof satellite !== 'undefined') {
+                    satrec = satellite.twoline2satrec(tleData.line1, tleData.line2);
+                    updateOrbitTrajectory();
+                    if (userCoords) {
+                        calculatePasses(userCoords.lat, userCoords.lon);
+                    }
+                }
+            } catch (err) {
+                console.error('Impossibile caricare dati orbitali TLE:', err);
+            }
+        }
+
+        // Disegna la linea dell'orbita futura dei prossimi 90 minuti
+        function updateOrbitTrajectory() {
+            if (!satrec || !orbitLine) return;
+            const points = [];
+            const now = Date.now();
+            // 92 minuti (un'orbita completa), 1 punto al minuto
+            for (let m = 0; m <= 92; m++) {
+                const date = new Date(now + m * 60000);
+                const pv = satellite.propagate(satrec, date);
+                if (pv.position) {
+                    const gmst = satellite.gstime(date);
+                    const gd = satellite.eciToGeodetic(pv.position, gmst);
+                    const lat = satellite.degreesLat(gd.latitude);
+                    const lon = satellite.degreesLong(gd.longitude);
+                    const alt = gd.height;
+                    const r = EARTH_RADIUS + (alt / 80);
+                    points.push(latLonToVector3(lat, lon, r));
+                }
+            }
+            orbitLine.geometry.dispose();
+            orbitLine.geometry = new THREE.BufferGeometry().setFromPoints(points);
+        }
+
+        // Helper direzione cardinale da Azimuth (0-360°)
+        function azimuthToCompass(deg) {
+            const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+            const idx = Math.round(((deg % 360) / 45)) % 8;
+            return dirs[idx];
+        }
+
+        // Verifica se il Sole è sotto l'orizzonte per l'utente e se la ISS è illuminata dal Sole
+        function checkPassVisualConditions(date, posEci, gmst, obsLatRad, obsLonRad) {
+            const deg2rad = Math.PI / 180;
+            const rad2deg = 180 / Math.PI;
+            const jd = date.getTime() / 86400000 + 2440587.5;
+            const n = jd - 2451545.0;
+            const L = (280.460 + 0.9856474 * n) % 360;
+            const g = ((357.528 + 0.9856003 * n) % 360) * deg2rad;
+            const lambda = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * deg2rad;
+            const epsilon = (23.439 - 0.0000004 * n) * deg2rad;
+
+            const ra = Math.atan2(Math.cos(epsilon) * Math.sin(lambda), Math.cos(lambda));
+            const dec = Math.asin(Math.sin(epsilon) * Math.sin(lambda));
+
+            // Altezza del Sole sull'orizzonte dell'osservatore
+            const lst = gmst + obsLonRad;
+            const ha = lst - ra;
+            const sinSunAlt = Math.sin(obsLatRad) * Math.sin(dec) + Math.cos(obsLatRad) * Math.cos(dec) * Math.cos(ha);
+            const sunAltDeg = Math.asin(Math.max(-1, Math.min(1, sinSunAlt))) * rad2deg;
+
+            // La ISS è fuori dal cilindro d'ombra della Terra?
+            const sunUnit = [Math.cos(dec) * Math.cos(ra), Math.cos(dec) * Math.sin(ra), Math.sin(dec)];
+            const dot = posEci.x * sunUnit[0] + posEci.y * sunUnit[1] + posEci.z * sunUnit[2];
+            let issSunlit = true;
+            if (dot < 0) {
+                const perpSq = (posEci.x ** 2 + posEci.y ** 2 + posEci.z ** 2) - (dot ** 2);
+                if (perpSq < 6371 ** 2) {
+                    issSunlit = false;
+                }
+            }
+
+            // Visibile ad occhio nudo: cielo crepuscolare/notturno a terra (Sole < -4°) e ISS illuminata
+            return issSunlit && sunAltDeg < -4;
+        }
+
+        // Calcola i prossimi passaggi sulla posizione dell'utente nei prossimi 3 giorni
+        function calculatePasses(lat, lon) {
+            userCoords = { lat, lon };
+            domElements.manualLat.value = lat.toFixed(4);
+            domElements.manualLon.value = lon.toFixed(4);
+            domElements.userCoordsLabel.innerHTML = `Posizione attiva: <strong class="text-emerald-400 font-mono">${lat.toFixed(3)}°, ${lon.toFixed(3)}°</strong>`;
+
+            // Posiziona il pin verde sul globo 3D
+            if (userPin) {
+                userPin.visible = true;
+                userPin.position.copy(latLonToVector3(lat, lon, EARTH_RADIUS + 0.25));
+                userPin.lookAt(new THREE.Vector3(0, 0, 0));
+            }
+
+            if (!satrec) {
+                domElements.passesContainer.innerHTML = `<p class="text-xs text-amber-400">Caricamento parametri orbitali TLE in corso, attendi un istante...</p>`;
+                return;
+            }
+
+            const deg2rad = Math.PI / 180;
+            const rad2deg = 180 / Math.PI;
+            const observerGd = {
+                longitude: lon * deg2rad,
+                latitude: lat * deg2rad,
+                height: 0.1
+            };
+
+            const passes = [];
+            let currentPass = null;
+            const startTime = Date.now();
+            const stepMs = 30 * 1000; // step di 30 secondi
+            const totalSteps = (72 * 3600 * 1000) / stepMs; // 72 ore
+
+            for (let i = 0; i <= totalSteps; i++) {
+                const date = new Date(startTime + i * stepMs);
+                const pv = satellite.propagate(satrec, date);
+                if (!pv.position) continue;
+
+                const gmst = satellite.gstime(date);
+                const posEcf = satellite.eciToEcf(pv.position, gmst);
+                const look = satellite.ecfToLookAngles(observerGd, posEcf);
+                const elDeg = look.elevation * rad2deg;
+                const azDeg = (look.azimuth * rad2deg + 360) % 360;
+
+                if (elDeg >= 10) {
+                    const isNakedEye = checkPassVisualConditions(date, pv.position, gmst, observerGd.latitude, observerGd.longitude);
+                    if (!currentPass) {
+                        currentPass = {
+                            start: date,
+                            end: date,
+                            maxEl: elDeg,
+                            startAz: azDeg,
+                            endAz: azDeg,
+                            visible: isNakedEye
+                        };
+                    } else {
+                        currentPass.end = date;
+                        currentPass.endAz = azDeg;
+                        if (elDeg > currentPass.maxEl) currentPass.maxEl = elDeg;
+                        if (isNakedEye) currentPass.visible = true;
+                    }
+                } else if (currentPass) {
+                    passes.push(currentPass);
+                    currentPass = null;
+                    if (passes.length >= 6) break;
+                }
+            }
+
+            renderPasses(passes);
+        }
+
+        function renderPasses(passes) {
+            if (!passes.length) {
+                domElements.passesContainer.innerHTML = `
+                    <div class="text-xs text-gray-400 bg-gray-800/40 p-4 rounded-xl border border-gray-700/50">
+                        Nessun passaggio sopra i 10° di elevazione previsto nelle prossime 72 ore per queste coordinate.
+                    </div>`;
+                return;
+            }
+
+            const dateFmt = new Intl.DateTimeFormat('it-IT', { weekday: 'short', day: '2-digit', month: 'short' });
+            const timeFmt = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+            domElements.passesContainer.innerHTML = passes.map(p => {
+                const durationMin = Math.max(1, Math.round((p.end - p.start) / 60000));
+                const dirStr = `${azimuthToCompass(p.startAz)} → ${azimuthToCompass(p.endAz)}`;
+                const badge = p.visible
+                    ? `<span class="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">🌟 Visibile ad occhio nudo</span>`
+                    : `<span class="inline-flex items-center gap-1 bg-gray-800 text-gray-400 border border-gray-700 px-2.5 py-0.5 rounded-full text-[11px]">🛰️ Passaggio diurno/ombra</span>`;
+
+                return `
+                    <div class="bg-gray-800/50 border ${p.visible ? 'border-amber-500/30' : 'border-gray-700/50'} p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-bold text-white capitalize">${dateFmt.format(p.start)}</span>
+                                <span class="font-mono text-cyan-400 font-bold">${timeFmt.format(p.start)} - ${timeFmt.format(p.end)}</span>
+                                ${badge}
+                            </div>
+                            <p class="text-gray-400">
+                                Durata: <strong class="text-gray-200">${durationMin} min</strong> &bull; 
+                                Elevazione max: <strong class="text-emerald-400">${Math.round(p.maxEl)}°</strong> &bull; 
+                                Traiettoria: <strong class="text-gray-200">${dirStr}</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Gestione pulsante GPS
+        domElements.locateUserBtn.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                domElements.userCoordsLabel.innerHTML = `<span class="text-red-400">Geolocalizzazione non supportata dal browser. Inserisci Lat/Lon manualmente.</span>`;
+                return;
+            }
+            domElements.locateUserBtn.disabled = true;
+            domElements.locateUserBtn.innerHTML = `<span>⏳</span> <span>Rilevamento...</span>`;
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    domElements.locateUserBtn.disabled = false;
+                    domElements.locateUserBtn.innerHTML = `<span>📍</span> <span>Aggiorna posizione</span>`;
+                    calculatePasses(pos.coords.latitude, pos.coords.longitude);
+                },
+                (err) => {
+                    domElements.locateUserBtn.disabled = false;
+                    domElements.locateUserBtn.innerHTML = `<span>📍</span> <span>Usa la mia posizione</span>`;
+                    domElements.userCoordsLabel.innerHTML = `<span class="text-amber-400">Permesso GPS negato. Inserisci le coordinate manualmente qui a destra:</span>`;
+                },
+                { enableHighAccuracy: false, timeout: 10000 }
+            );
+        });
+
+        // Gestione calcolo manuale Lat/Lon
+        domElements.manualCalcBtn.addEventListener('click', () => {
+            const lat = parseFloat(domElements.manualLat.value);
+            const lon = parseFloat(domElements.manualLon.value);
+            if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                calculatePasses(lat, lon);
+            } else {
+                domElements.userCoordsLabel.innerHTML = `<span class="text-red-400">Inserisci valori validi (Lat: -90..90, Lon: -180..180).</span>`;
             }
         });
 
@@ -410,14 +783,12 @@
                 currentIssData = data;
                 const { latitude, longitude, altitude, velocity, visibility, footprint, solar_lat, solar_lon } = data;
                 
-                // 1. Aggiorna i testi
                 domElements.lat.textContent = latitude.toFixed(4);
                 domElements.lon.textContent = longitude.toFixed(4);
                 domElements.alt.textContent = `${altitude.toFixed(1)} km`;
                 domElements.vel.textContent = `${velocity.toFixed(0)} km/h`;
                 domElements.footprintVal.textContent = `${Math.round(footprint)} km`;
 
-                // 2. Aggiorna indicatore Luce/Ombra
                 if (visibility === 'daylight') {
                     domElements.visStatus.innerHTML = '☀️ Esposta al Sole';
                     domElements.visStatus.className = 'font-sans text-sm sm:text-base lg:text-lg font-bold mt-2 text-amber-400';
@@ -426,21 +797,16 @@
                     domElements.visStatus.className = 'font-sans text-sm sm:text-base lg:text-lg font-bold mt-2 text-indigo-400';
                 }
 
-                // 3. Posiziona la ISS
-                const issRadius = EARTH_RADIUS + (altitude / 80); // Esagerato per renderlo ben visibile in 3D
+                const issRadius = EARTH_RADIUS + (altitude / 80);
                 issMarker.position.copy(latLonToVector3(latitude, longitude, issRadius));
 
-                // 4. Posiziona il Sole (Luce Direzionale reale)
                 const sunPos = latLonToVector3(solar_lat, solar_lon, 1000);
                 directionalLight.position.copy(sunPos);
 
-                // 5. Posiziona l'Impronta Visiva a terra
-                // footprint = diametro in km. Calcoliamo il raggio convertito in scala per Three.js
                 const fpRadiusScale = Math.sin((footprint / 2) / 6371) * EARTH_RADIUS;
                 footprintMesh.scale.set(fpRadiusScale, fpRadiusScale, 1);
-                // La posizioniamo appena sopra la superficie per evitare collisioni visive (Z-fighting)
                 footprintMesh.position.copy(latLonToVector3(latitude, longitude, EARTH_RADIUS + 0.15));
-                footprintMesh.lookAt(new THREE.Vector3(0,0,0));
+                footprintMesh.lookAt(new THREE.Vector3(0, 0, 0));
 
             } catch (error) {
                 console.error('Errore ISS API:', error);
@@ -482,7 +848,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             initGlobe();
             updateIssPosition();
+            fetchTleData();
+
             setInterval(updateIssPosition, 5000);
+            // Aggiorna la linea dell'orbita ogni 60 secondi
+            setInterval(updateOrbitTrajectory, 60000);
 
             domElements.fetchGeminiBtn.addEventListener('click', () => {
                 if (currentIssData) {
